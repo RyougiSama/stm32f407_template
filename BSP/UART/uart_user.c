@@ -14,6 +14,7 @@ void Uart_DataProcess(void)
     uint8_t command_length = Command_GetCommand(g_uart_command_buffer);
     // 收到正确格式数据包时的解析
     if (command_length) {
+        printf("Received command:");
         HAL_UART_Transmit_DMA(&huart1, g_uart_command_buffer, command_length);
     }
 }
@@ -28,4 +29,24 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         HAL_UARTEx_ReceiveToIdle_DMA(huart, g_uart_command_buffer, UART_USER_BUFFER_SIZE);
         __HAL_DMA_ENABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
     }
+}
+
+// printf 重定向到串口1
+int fputc(int ch, FILE *f)
+{
+    HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
+    return ch;
+}
+
+/**
+  * @brief: 重定向c库函数getchar,scanf到DEBUG_USARTx
+  * @param: 无
+  * @return: 无
+  *
+  */
+int fgetc(FILE *f)
+{
+    uint8_t ch = 0;
+    HAL_UART_Receive(&huart1, &ch, 1, 0xffff);
+    return ch;
 }

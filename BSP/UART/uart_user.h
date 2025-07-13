@@ -14,6 +14,7 @@
 #define __UART_USER_H
 
 #include "main.h"
+#include "stdio.h"
 
 #define UART_USER_BUFFER_SIZE 50
 
