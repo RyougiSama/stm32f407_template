@@ -3,7 +3,7 @@
  * @author Shiki
  * @brief UART user buffer, to start, use HAL_UARTEx_ReceiveToIdle_DMA in user_init.c
  *        to receive data into this buffer.
- *        Remember to call Uart_DataProcess() in the main loop to process the received data.
+ *        Remember to call Uart_DataProcess() in the task scheduler to process the received data.
  * @version 0.1
  * @date 2025-07-13
  * 
