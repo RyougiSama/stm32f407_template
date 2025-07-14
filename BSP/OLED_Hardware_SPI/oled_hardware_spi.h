@@ -1,8 +1,8 @@
 /*
  * STM32F407 OLED SPI Driver Configuration:
  *   Hardware Connection:
- *     OLED_SCK  -> PA5  (SPI1_SCK)
- *     OLED_MOSI -> PA7  (SPI1_MOSI)
+ *     OLED_SCK  -> PA5  (SPI1_SCK, D0)
+ *     OLED_MOSI -> PA7  (SPI1_MOSI, D1)
  *     OLED_RES  -> PB0  (GPIO Output)
  *     OLED_DC   -> PB1  (GPIO Output)
  *     OLED_CS   -> PA4  (SPI1_NSS) - Optional, can be controlled by GPIO
