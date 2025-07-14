@@ -25,12 +25,11 @@
 /* 任务函数实现 */
 
 /**
- * @brief 舵机任务
+ * @brief 舵机控制任务
  * 
  */
-static void Task_Servo(void)
+static void Task_ServoCtrl(void)
 {
-
 }
 
 /**
@@ -39,7 +38,6 @@ static void Task_Servo(void)
  */
 static void Task_OLEDDisplay(void)
 {
-    /* OLED显示相关代码 */
 }
 
 /**
@@ -77,7 +75,7 @@ void AppTasks_Init(void)
     /* 添加任务到调度器 */
     /* 参数：任务函数, 执行周期(ms), 优先级, 任务名称 */
     TaskScheduler_AddTask(Task_UartProcess, 10, TASK_PRIORITY_HIGH, "UART_Task");
-    TaskScheduler_AddTask(Task_Servo, 20, TASK_PRIORITY_NORMAL, "Servo_Task");
+    // TaskScheduler_AddTask(Task_ServoCtrl, 20, TASK_PRIORITY_NORMAL, "Servo_Task");
     // TaskScheduler_AddTask(Task_OLEDDisplay, 100, TASK_PRIORITY_NORMAL, "OLED_Task");
     // TaskScheduler_AddTask(Task_SystemMonitor, 1000, TASK_PRIORITY_NORMAL, "Monitor_Task");
     /* 输出任务信息 */
