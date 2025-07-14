@@ -20,14 +20,6 @@
 
 #include "task_scheduler.h"
 
-/* 任务函数声明 */
-void Task_LedBlink(void);
-void Task_UartProcess(void);
-void Task_SystemMonitor(void);
-void Task_Idle(void);
-void Task_WatchdogFeed(void);
-void Task_HeartBeat(void);
-
 /* 任务初始化函数 */
 void AppTasks_Init(void);
 

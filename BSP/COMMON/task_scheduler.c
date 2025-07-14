@@ -23,9 +23,6 @@
 static Task_t task_table[MAX_TASKS];
 static uint8_t task_count = 0;
 
-/* 系统时基 */
-static uint32_t system_tick = 0;
-
 /**
  * @brief 初始化任务调度器
  * @retval HAL_StatusTypeDef
@@ -35,7 +32,6 @@ HAL_StatusTypeDef TaskScheduler_Init(void)
     /* 清空任务表 */
     memset(task_table, 0, sizeof(task_table));
     task_count = 0;
-    system_tick = 0;
     return HAL_OK;
 }
 
