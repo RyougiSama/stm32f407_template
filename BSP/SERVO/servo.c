@@ -32,7 +32,7 @@ static void Servo_SetCompare(uint16_t servo_channel, uint16_t compare)
  * 
  * @param angle 舵机角度 -90°到90°之间
  */
-void Servo_SetAngle_CH1(int16_t angle)
+void Servo_SetAngle_X(int16_t angle)
 {
     if (angle < -90 || angle > 90)
         return;
@@ -46,7 +46,7 @@ void Servo_SetAngle_CH1(int16_t angle)
  * 
  * @param angle 舵机角度 -135°到135°之间
  */
-void Servo_SetAngle_CH2(int16_t angle)
+void Servo_SetAngle_Y(int16_t angle)
 {
     if (angle < -135 || angle > 135)
         return;

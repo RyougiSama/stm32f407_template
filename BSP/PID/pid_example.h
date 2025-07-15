@@ -23,7 +23,10 @@ extern PidController_t g_servo_position_pid;
 
 /* 函数声明 */
 void PID_Example_Init(void);
+
+#if 0
 void PID_Example_MotorSpeedControl(float target_speed, float current_speed);
 void PID_Example_ServoPositionControl(float target_angle, float current_angle);
+#endif
 
 #endif /* __PID_EXAMPLE_H */

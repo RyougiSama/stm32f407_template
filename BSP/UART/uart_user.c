@@ -31,7 +31,13 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     }
 }
 
-// printf 重定向到串口1
+/**
+ * @brief 重定向c库函数printf到DEBUG_USARTx
+ * 
+ * @param ch 
+ * @param f 
+ * @return int 
+ */
 int fputc(int ch, FILE *f)
 {
     HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
@@ -40,8 +46,8 @@ int fputc(int ch, FILE *f)
 
 /**
   * @brief: 重定向c库函数getchar,scanf到DEBUG_USARTx
-  * @param: 无
-  * @return: 无
+  * @param f
+  * @return int
   *
   */
 int fgetc(FILE *f)

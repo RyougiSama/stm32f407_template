@@ -25,6 +25,7 @@ void PID_Example_Init(void)
     printf("PID controllers initialized successfully\r\n");
 }
 
+#if 0
 /**
  * @brief 电机速度PID控制示例
  *
@@ -40,8 +41,8 @@ void PID_Example_MotorSpeedControl(float target_speed, float current_speed)
     float pwm_output = PID_Compute(&g_motor_speed_pid, current_speed);
 
     /* 输出调试信息 */
-    printf("Motor Speed Control - Target: %.1f, Current: %.1f, Output: %.1f\r\n",
-           target_speed, current_speed, pwm_output);
+    // printf("Motor Speed Control - Target: %.1f, Current: %.1f, Output: %.1f\r\n",
+    //        target_speed, current_speed, pwm_output);
 
     /* 在这里可以将pwm_output应用到电机控制 */
     /* 例如：Motor_SetPWM((int16_t)pwm_output); */
@@ -62,8 +63,8 @@ void PID_Example_ServoPositionControl(float target_angle, float current_angle)
     float servo_output = PID_Compute(&g_servo_position_pid, current_angle);
 
     /* 输出调试信息 */
-    printf("Servo Position Control - Target: %.1f, Current: %.1f, Output: %.1f\r\n",
-           target_angle, current_angle, servo_output);
+    // printf("Servo Position Control - Target: %.1f, Current: %.1f, Output: %.1f\r\n",
+    //        target_angle, current_angle, servo_output);
 
     /* 在这里可以将servo_output应用到舵机控制 */
     /* 例如：Servo_SetAngle_CH1((int16_t)servo_output); */
@@ -106,3 +107,4 @@ void PID_Example_ResetAll(void)
     PID_Reset(&g_servo_position_pid);
     printf("All PID controllers reset\r\n");
 }
+#endif

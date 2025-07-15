@@ -16,7 +16,7 @@
 #include <stdint.h>
 
 void Servo_Init(void);
-void Servo_SetAngle_CH1(int16_t angle);
-void Servo_SetAngle_CH2(int16_t angle);
+void Servo_SetAngle_X(int16_t angle);
+void Servo_SetAngle_Y(int16_t angle);
 
 #endif
