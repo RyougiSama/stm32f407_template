@@ -18,6 +18,9 @@ void OLED_ChangeMode(void)
             g_oled_mode = CH_Y_50;
             break;
         case CH_Y_50:
+            g_oled_mode = TEST_MODE;
+            break;
+        case TEST_MODE:
             g_oled_mode = CH_X_10;
             break;
     }
@@ -25,6 +28,7 @@ void OLED_ChangeMode(void)
 
 void OLED_Display(void)
 {
+    OLED_Clear();
     switch (g_oled_mode) {
         case CH_X_10:
             OLED_ShowString(0, 0, "CH_X 10 Mode", 16);
@@ -38,7 +42,16 @@ void OLED_Display(void)
         case CH_Y_50:
             OLED_ShowString(0, 0, "CH_Y 50 Mode", 16);
             break;
+        case TEST_MODE:
+            OLED_ShowString(0, 0, "Test Mode", 16);
     }
-    OLED_ShowNum(8*12, 2, g_servox_duty, 4, 16);
-    OLED_ShowNum(8*12, 5, g_servoy_duty, 4, 16);
+    if (g_oled_mode == TEST_MODE) {
+        OLED_ShowString(0, 2, "K0: Run Task1", 16);
+        OLED_ShowString(0, 5, "K1: Run Task2", 16);
+    } else {
+        OLED_ShowString(0, 2, "CH_X Duty:", 16);
+        OLED_ShowString(0, 5, "CH_Y Duty:", 16);
+        OLED_ShowNum(8*12, 2, g_servox_duty, 4, 16);
+        OLED_ShowNum(8*12, 5, g_servoy_duty, 4, 16);
+    }
 }

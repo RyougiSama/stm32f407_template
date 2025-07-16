@@ -6,6 +6,7 @@ typedef enum {
     CH_X_50,
     CH_Y_10,
     CH_Y_50,
+    TEST_MODE
 } OLED_Disp_t;
 
 extern OLED_Disp_t g_oled_mode;

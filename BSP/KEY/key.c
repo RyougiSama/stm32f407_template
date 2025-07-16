@@ -3,6 +3,8 @@
 #include "servo_user.h"
 #include "oled_user.h"
 
+#include "control.h"
+
 /* 按键消抖实例 */
 static KeyDebounce_t key_debounce;
 
@@ -176,8 +178,7 @@ void Key_Proc(void)
             case CH_X_10: {
                 switch (key_val) {
                     case USER_KEY:
-                        /* 按下用户键切换到下一个模式 */
-                        OLED_ChangeMode();  /* 切换到CH_X_50模式 */
+                        OLED_ChangeMode();
                         break;
                     case KEY_0:
                         /* 微调增加X轴舵机角度 */
@@ -195,8 +196,7 @@ void Key_Proc(void)
             case CH_X_50: {
                 switch (key_val) {
                     case USER_KEY:
-                        /* 按下用户键切换到下一个模式 */
-                        OLED_ChangeMode();  /* 切换到CH_Y_10模式 */
+                        OLED_ChangeMode();
                         break;
                     case KEY_0:
                         /* 粗调增加X轴舵机角度 */
@@ -214,8 +214,7 @@ void Key_Proc(void)
             case CH_Y_10: {
                 switch (key_val) {
                     case USER_KEY:
-                        /* 按下用户键切换到下一个模式 */
-                        OLED_ChangeMode();  /* 切换到CH_Y_50模式 */
+                        OLED_ChangeMode();
                         break;
                     case KEY_0:
                         /* 微调增加Y轴舵机角度 */
@@ -233,8 +232,7 @@ void Key_Proc(void)
             case CH_Y_50: {
                 switch (key_val) {
                     case USER_KEY:
-                        /* 按下用户键切换到下一个模式 */
-                        OLED_ChangeMode();  /* 切换回CH_X_10模式 */
+                        OLED_ChangeMode();
                         break;
                     case KEY_0:
                         /* 粗调增加Y轴舵机角度 */
@@ -249,6 +247,19 @@ void Key_Proc(void)
                 }
                 break;
             }
+            case TEST_MODE:
+                switch (key_val) {
+                    case USER_KEY:
+                        OLED_ChangeMode();
+                        break;
+                    case KEY_0:
+                        Task1_Reset_To_Ctr(); // 执行任务1
+                        break;
+                    case KEY_1:
+                        Task2_Run(); // 执行任务2
+                        break;
+                }
+                break;
         }
         Servo_SetPulseWidth_X(g_servox_duty);
         Servo_SetPulseWidth_Y(g_servoy_duty);
