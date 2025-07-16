@@ -21,11 +21,10 @@
 #include "usart.h"
 #include "gpio.h"
 #include "oled_hardware_spi.h"
-#include "pid_example.h"
 #include "key.h"
+#include "servo.h"
 
 /* 任务函数实现 */
-
 #if 0
 /**
  * @brief 舵机控制任务
@@ -34,9 +33,7 @@
 static void Task_ServoCtrl(void)
 {
     // 1. 获取目标角度 target_angle
-
     // 2. 获取当前角度 current_angle
-
     // 3. PID 控制计算
     PID_SetTarget(&g_servo_position_pid, target_angle);
     float servo_output = PID_Compute(&g_servo_position_pid, current_angle);
@@ -46,15 +43,30 @@ static void Task_ServoCtrl(void)
 #endif
 
 #if 0
+static void Task_KeyProcess(void)
+{
+
+}
+#endif
+
+#if 1
 /**
  * @brief OLED显示任务
  * 
  */
 static void Task_OLEDDisplay(void)
 {
+    if (g_servo_channel == SERVO_CH_X) {
+        OLED_ShowChar(8*12, 0, 'X', 16);
+    } else if (g_servo_channel == SERVO_CH_Y) {
+        OLED_ShowChar(8*12, 0, 'Y', 16);
+    }
+    OLED_ShowNum(8*12, 2, g_servox_duty, 4, 16);
+    OLED_ShowNum(8*12, 5, g_servoy_duty, 4, 16);
 }
 #endif
 
+#if 1
 /**
  * @brief UART数据处理任务
  */
@@ -63,6 +75,7 @@ static void Task_UartProcess(void)
     /* 调用原有的UART数据处理函数 */
     Uart_DataProcess();
 }
+#endif
 
 #if 0
 /**
@@ -94,7 +107,7 @@ void AppTasks_Init(void)
     TaskScheduler_AddTask(Task_UartProcess, 10, TASK_PRIORITY_HIGH, "UART_Task");
     TaskScheduler_AddTask(Key_Proc, 20, TASK_PRIORITY_NORMAL, "Key_Task");
     // TaskScheduler_AddTask(Task_ServoCtrl, 20, TASK_PRIORITY_NORMAL, "Servo_Task");
-    // TaskScheduler_AddTask(Task_OLEDDisplay, 100, TASK_PRIORITY_NORMAL, "OLED_Task");
+    TaskScheduler_AddTask(Task_OLEDDisplay, 100, TASK_PRIORITY_NORMAL, "OLED_Task");
     // TaskScheduler_AddTask(Task_SystemMonitor, 1000, TASK_PRIORITY_NORMAL, "Monitor_Task");
     /* 输出任务信息 */
     // printf("Task Scheduler Initialized with %d tasks\r\n", TaskScheduler_GetTaskCount());

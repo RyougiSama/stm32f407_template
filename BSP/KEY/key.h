@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 #include "main.h"
+#include "servo.h"
 
 /* 按键消抖时间定义 (ms) */
 #define KEY_DEBOUNCE_TIME 20
@@ -44,8 +45,11 @@ typedef struct {
     uint8_t key_pressed;      /* 按键按下标志 */
 } KeyDebounce_t;
 
+extern uint16_t g_servox_duty;
+extern uint16_t g_servoy_duty;
+extern ServoChannel_t g_servo_channel;
+
 /* 函数声明 */
-KeyValue_t Key_GetNum(void);
 KeyValue_t Key_GetDebounced(void);
 void Key_Proc(void);
 

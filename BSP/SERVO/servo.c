@@ -1,9 +1,6 @@
 #include "servo.h"
 #include "tim.h"
 
-#define SERVO_MIN 500  // 舵机的-90°
-#define SERVO_MAX 2500 // 舵机的90°
-
 /**
  * @brief 舵机初始化
  * 
@@ -37,7 +34,20 @@ void Servo_SetAngle_X(int16_t angle)
     if (angle < -90 || angle > 90)
         return;
 
-    uint16_t pulse_width = SERVO_MIN + (SERVO_MAX - SERVO_MIN) * (angle + 90) / 180;
+    uint16_t pulse_width = SERVO_PWM_MIN + (SERVO_PWM_MAX - SERVO_PWM_MIN) * (angle + 90) / 180;
+    Servo_SetCompare(TIM_CHANNEL_1, pulse_width);
+}
+
+/**
+ * @brief 设置通道1舵机占空比
+ * 
+ * @param pulse_width 500到2500之间
+ */
+void Servo_SetPulseWidth_X(uint16_t pulse_width)
+{
+    if (pulse_width < SERVO_PWM_MIN || pulse_width > SERVO_PWM_MAX)
+        return;
+
     Servo_SetCompare(TIM_CHANNEL_1, pulse_width);
 }
 
@@ -51,6 +61,19 @@ void Servo_SetAngle_Y(int16_t angle)
     if (angle < -135 || angle > 135)
         return;
 
-    uint16_t pulse_width = SERVO_MIN + (SERVO_MAX - SERVO_MIN) * (angle + 135) / 270;
+    uint16_t pulse_width = SERVO_PWM_MIN + (SERVO_PWM_MAX - SERVO_PWM_MIN) * (angle + 135) / 270;
+    Servo_SetCompare(TIM_CHANNEL_2, pulse_width);
+}
+
+/**
+ * @brief 设置通道2舵机占空比
+ * 
+ * @param pulse_width 500到2500之间
+ */
+void Servo_SetPulseWidth_Y(uint16_t pulse_width)
+{
+    if (pulse_width < SERVO_PWM_MIN || pulse_width > SERVO_PWM_MAX)
+        return;
+
     Servo_SetCompare(TIM_CHANNEL_2, pulse_width);
 }

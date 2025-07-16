@@ -1,12 +1,11 @@
 #include "key.h"
-#include "servo.h"
 #include "stdio.h"
 #include "task_scheduler.h"
 
 /* 按键消抖实例 */
 static KeyDebounce_t key_debounce;
 
-KeyValue_t Key_GetNum(void)
+static KeyValue_t Key_GetNum(void)
 {
     KeyValue_t key_num = KEY_NONE;
     // Check Key 0 (PE4)
@@ -32,7 +31,6 @@ KeyValue_t Key_GetDebounced(void)
 {
     uint32_t current_tick = TaskScheduler_GetSystemTick();
     KeyValue_t raw_key = Key_GetNum();
-    
     switch (key_debounce.state) {
         case KEY_STATE_IDLE:
             if (raw_key != KEY_NONE) {
@@ -41,7 +39,6 @@ KeyValue_t Key_GetDebounced(void)
                 key_debounce.state = KEY_STATE_PRESSED;
             }
             break;
-            
         case KEY_STATE_PRESSED:
             if (raw_key == key_debounce.current_val) {
                 /* 按键值稳定，检查是否达到消抖时间 */
@@ -61,7 +58,6 @@ KeyValue_t Key_GetDebounced(void)
                 }
             }
             break;
-            
         case KEY_STATE_CONFIRMED:
             if (raw_key == KEY_NONE) {
                 /* 按键释放 */
@@ -69,7 +65,6 @@ KeyValue_t Key_GetDebounced(void)
                 key_debounce.state = KEY_STATE_RELEASED;
             }
             break;
-            
         case KEY_STATE_RELEASED:
             if (raw_key == KEY_NONE) {
                 /* 确认按键释放 */
@@ -86,11 +81,10 @@ KeyValue_t Key_GetDebounced(void)
             }
             break;
     }
-    
     return KEY_NONE;  /* 无稳定按键 */
 }
 
-/*
+#if 0
 uint8_t Matrix_Key_Scan(void)
 {
     uint8_t current_raw_key = 0;
@@ -167,12 +161,12 @@ uint8_t Matrix_Key_Scan(void)
 
     return current_raw_key;
 }
-*/
+#endif
 
-static uint8_t key_mode = 0;
 
-int16_t servox_angle = 0;
-int16_t servoy_angle = 0;
+uint16_t g_servox_duty = 0;
+uint16_t g_servoy_duty = 0;
+ServoChannel_t g_servo_channel = SERVO_CH_X;
 
 void Key_Proc(void)
 {
@@ -182,46 +176,40 @@ void Key_Proc(void)
     /* 只有在按键值变化且不为KEY_NONE时才处理 */
     if (key_val != KEY_NONE && key_val != key_val_old) {
         printf("Key Value: %d\n", key_val);
-        if (key_mode == 0) {
+        if (g_servo_channel == SERVO_CH_X) {
             /* 模式0：控制X轴舵机 */
             switch (key_val) {
                 case USER_KEY:
-                    key_mode = 1;
-                    printf("Switch to Y-axis control mode\n");
+                    g_servo_channel = SERVO_CH_Y;
                     break;
                 case KEY_0:
-                    servox_angle += 1;
-                    if (servox_angle > 90) servox_angle = 90;  /* 角度限制 */
-                    printf("Servo X angle: %d\n", servox_angle);
+                    g_servox_duty += 1;
+                    if (g_servox_duty > 90) g_servox_duty = 90;  /* 角度限制 */
                     break;
                 case KEY_1:
-                    servox_angle -= 1;
-                    if (servox_angle < -90) servox_angle = -90;  /* 角度限制 */
-                    printf("Servo X angle: %d\n", servox_angle);
+                    g_servox_duty -= 1;
+                    if (g_servox_duty < -90) g_servox_duty = -90;  /* 角度限制 */
                     break;
             }
-        } else if (key_mode == 1) {
+        } else if (g_servo_channel == SERVO_CH_Y) {
             /* 模式1：控制Y轴舵机 */
             switch (key_val) {
                 case USER_KEY:
-                    key_mode = 0;
-                    printf("Switch to X-axis control mode\n");
+                    g_servo_channel = SERVO_CH_X;
                     break;
                 case KEY_0:
-                    servoy_angle += 1;
-                    if (servoy_angle > 90) servoy_angle = 90;  /* 角度限制 */
-                    printf("Servo Y angle: %d\n", servoy_angle);
+                    g_servoy_duty += 1;
+                    if (g_servoy_duty > 90) g_servoy_duty = 90;  /* 角度限制 */
                     break;
                 case KEY_1:
-                    servoy_angle -= 1;
-                    if (servoy_angle < -90) servoy_angle = -90;  /* 角度限制 */
-                    printf("Servo Y angle: %d\n", servoy_angle);
+                    g_servoy_duty -= 1;
+                    if (g_servoy_duty < -90) g_servoy_duty = -90;  /* 角度限制 */
                     break;
             }
         }
         /* 更新舵机角度 */
-        Servo_SetAngle_X(servox_angle);
-        Servo_SetAngle_Y(servoy_angle);
+        Servo_SetAngle_X(g_servox_duty);
+        Servo_SetAngle_Y(g_servoy_duty);
         key_val_old = key_val;
     }
     /* 当按键释放时，重置key_val_old */

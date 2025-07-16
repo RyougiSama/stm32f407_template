@@ -15,8 +15,19 @@
 
 #include <stdint.h>
 
+#define SERVO_PWM_MIN           500  // 舵机的最小占空比
+#define SERVO_PWM_ANGLE_ZERO    1500 // 舵机的0度占空比
+#define SERVO_PWM_MAX           2500 // 舵机的最大占空比
+
+typedef enum {
+    SERVO_CH_X = 1, // 通道1对应PA6
+    SERVO_CH_Y = 2  // 通道2对应PA7
+} ServoChannel_t;
+
 void Servo_Init(void);
 void Servo_SetAngle_X(int16_t angle);
+void Servo_SetPulseWidth_X(uint16_t pulse_width);
 void Servo_SetAngle_Y(int16_t angle);
+void Servo_SetPulseWidth_Y(uint16_t pulse_width);
 
 #endif
