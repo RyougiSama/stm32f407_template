@@ -1,6 +1,7 @@
 #include "key.h"
-#include "stdio.h"
 #include "task_scheduler.h"
+#include "servo_user.h"
+#include "oled_user.h"
 
 /* 按键消抖实例 */
 static KeyDebounce_t key_debounce;
@@ -163,11 +164,6 @@ uint8_t Matrix_Key_Scan(void)
 }
 #endif
 
-
-uint16_t g_servox_duty = 0;
-uint16_t g_servoy_duty = 0;
-ServoChannel_t g_servo_channel = SERVO_CH_X;
-
 void Key_Proc(void)
 {
     static KeyValue_t key_val_old = KEY_NONE;
@@ -175,41 +171,88 @@ void Key_Proc(void)
     KeyValue_t key_val = Key_GetDebounced();
     /* 只有在按键值变化且不为KEY_NONE时才处理 */
     if (key_val != KEY_NONE && key_val != key_val_old) {
-        printf("Key Value: %d\n", key_val);
-        if (g_servo_channel == SERVO_CH_X) {
-            /* 模式0：控制X轴舵机 */
-            switch (key_val) {
-                case USER_KEY:
-                    g_servo_channel = SERVO_CH_Y;
-                    break;
-                case KEY_0:
-                    g_servox_duty += 1;
-                    if (g_servox_duty > 90) g_servox_duty = 90;  /* 角度限制 */
-                    break;
-                case KEY_1:
-                    g_servox_duty -= 1;
-                    if (g_servox_duty < -90) g_servox_duty = -90;  /* 角度限制 */
-                    break;
+        /* 根据当前显示模式处理按键 */
+        switch (g_oled_mode) {
+            case CH_X_10: {
+                switch (key_val) {
+                    case USER_KEY:
+                        /* 按下用户键切换到下一个模式 */
+                        OLED_ChangeMode();  /* 切换到CH_X_50模式 */
+                        break;
+                    case KEY_0:
+                        /* 微调增加X轴舵机角度 */
+                        g_servox_duty += 10;
+                        if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
+                        break;
+                    case KEY_1:
+                        /* 微调减少X轴舵机角度 */
+                        g_servox_duty -= 10;
+                        if (g_servox_duty < SERVO_PWM_MIN) g_servox_duty = SERVO_PWM_MIN;
+                        break;
+                }
+                break;
             }
-        } else if (g_servo_channel == SERVO_CH_Y) {
-            /* 模式1：控制Y轴舵机 */
-            switch (key_val) {
-                case USER_KEY:
-                    g_servo_channel = SERVO_CH_X;
-                    break;
-                case KEY_0:
-                    g_servoy_duty += 1;
-                    if (g_servoy_duty > 90) g_servoy_duty = 90;  /* 角度限制 */
-                    break;
-                case KEY_1:
-                    g_servoy_duty -= 1;
-                    if (g_servoy_duty < -90) g_servoy_duty = -90;  /* 角度限制 */
-                    break;
+            case CH_X_50: {
+                switch (key_val) {
+                    case USER_KEY:
+                        /* 按下用户键切换到下一个模式 */
+                        OLED_ChangeMode();  /* 切换到CH_Y_10模式 */
+                        break;
+                    case KEY_0:
+                        /* 粗调增加X轴舵机角度 */
+                        g_servox_duty += 50;
+                        if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
+                        break;
+                    case KEY_1:
+                        /* 粗调减少X轴舵机角度 */
+                        g_servox_duty -= 50;
+                        if (g_servox_duty < SERVO_PWM_MIN) g_servox_duty = SERVO_PWM_MIN;
+                        break;
+                }
+                break;
+            }
+            case CH_Y_10: {
+                switch (key_val) {
+                    case USER_KEY:
+                        /* 按下用户键切换到下一个模式 */
+                        OLED_ChangeMode();  /* 切换到CH_Y_50模式 */
+                        break;
+                    case KEY_0:
+                        /* 微调增加Y轴舵机角度 */
+                        g_servoy_duty += 10;
+                        if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
+                        break;
+                    case KEY_1:
+                        /* 微调减少Y轴舵机角度 */
+                        g_servoy_duty -= 10;
+                        if (g_servoy_duty < SERVO_PWM_MIN) g_servoy_duty = SERVO_PWM_MIN;
+                        break;
+                }
+                break;
+            }
+            case CH_Y_50: {
+                switch (key_val) {
+                    case USER_KEY:
+                        /* 按下用户键切换到下一个模式 */
+                        OLED_ChangeMode();  /* 切换回CH_X_10模式 */
+                        break;
+                    case KEY_0:
+                        /* 粗调增加Y轴舵机角度 */
+                        g_servoy_duty += 50;
+                        if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
+                        break;
+                    case KEY_1:
+                        /* 粗调减少Y轴舵机角度 */
+                        g_servoy_duty -= 50;
+                        if (g_servoy_duty < SERVO_PWM_MIN) g_servoy_duty = SERVO_PWM_MIN;
+                        break;
+                }
+                break;
             }
         }
-        /* 更新舵机角度 */
-        Servo_SetAngle_X(g_servox_duty);
-        Servo_SetAngle_Y(g_servoy_duty);
+        Servo_SetPulseWidth_X(g_servox_duty);
+        Servo_SetPulseWidth_Y(g_servoy_duty);
+        /* 更新旧按键值 */
         key_val_old = key_val;
     }
     /* 当按键释放时，重置key_val_old */

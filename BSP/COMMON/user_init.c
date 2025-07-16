@@ -17,7 +17,7 @@ void User_Init(void)
     AppTasks_Init();
     // 初始化OLED显示
     OLED_Init();
-    OLED_ShowString(0, 0, "Current CH:", 16);
+    OLED_ShowString(0, 0, "CH_X 10 Mode", 16);
     OLED_ShowString(0, 2, "CH_X Duty:", 16);
     OLED_ShowString(0, 5, "CH_Y Duty:", 16);
     // 初始化舵机

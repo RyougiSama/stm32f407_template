@@ -20,9 +20,9 @@
 #include "uart_user.h"
 #include "usart.h"
 #include "gpio.h"
-#include "oled_hardware_spi.h"
 #include "key.h"
 #include "servo.h"
+#include "oled_user.h"
 
 /* 任务函数实现 */
 #if 0
@@ -56,13 +56,7 @@ static void Task_KeyProcess(void)
  */
 static void Task_OLEDDisplay(void)
 {
-    if (g_servo_channel == SERVO_CH_X) {
-        OLED_ShowChar(8*12, 0, 'X', 16);
-    } else if (g_servo_channel == SERVO_CH_Y) {
-        OLED_ShowChar(8*12, 0, 'Y', 16);
-    }
-    OLED_ShowNum(8*12, 2, g_servox_duty, 4, 16);
-    OLED_ShowNum(8*12, 5, g_servoy_duty, 4, 16);
+    OLED_Display();
 }
 #endif
 
