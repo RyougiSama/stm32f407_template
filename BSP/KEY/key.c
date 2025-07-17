@@ -181,31 +181,13 @@ void Key_Proc(void)
                         OLED_ChangeMode();
                         break;
                     case KEY_0:
-                        /* 微调增加X轴舵机角度 */
+                        /* 增加X轴舵机角度 */
                         g_servox_duty += 10;
                         if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
                         break;
                     case KEY_1:
-                        /* 微调减少X轴舵机角度 */
+                        /* 减少X轴舵机角度 */
                         g_servox_duty -= 10;
-                        if (g_servox_duty < SERVO_PWM_MIN) g_servox_duty = SERVO_PWM_MIN;
-                        break;
-                }
-                break;
-            }
-            case CH_X_50: {
-                switch (key_val) {
-                    case USER_KEY:
-                        OLED_ChangeMode();
-                        break;
-                    case KEY_0:
-                        /* 粗调增加X轴舵机角度 */
-                        g_servox_duty += 50;
-                        if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
-                        break;
-                    case KEY_1:
-                        /* 粗调减少X轴舵机角度 */
-                        g_servox_duty -= 50;
                         if (g_servox_duty < SERVO_PWM_MIN) g_servox_duty = SERVO_PWM_MIN;
                         break;
                 }
@@ -217,49 +199,42 @@ void Key_Proc(void)
                         OLED_ChangeMode();
                         break;
                     case KEY_0:
-                        /* 微调增加Y轴舵机角度 */
+                        /* 增加Y轴舵机角度 */
                         g_servoy_duty += 10;
                         if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
                         break;
                     case KEY_1:
-                        /* 微调减少Y轴舵机角度 */
+                        /* 减少Y轴舵机角度 */
                         g_servoy_duty -= 10;
                         if (g_servoy_duty < SERVO_PWM_MIN) g_servoy_duty = SERVO_PWM_MIN;
                         break;
                 }
                 break;
             }
-            case CH_Y_50: {
+            case TEST_MODE: {
                 switch (key_val) {
                     case USER_KEY:
                         OLED_ChangeMode();
                         break;
                     case KEY_0:
-                        /* 粗调增加Y轴舵机角度 */
-                        g_servoy_duty += 50;
-                        if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
+                        OLED_ChangeTask();
                         break;
                     case KEY_1:
-                        /* 粗调减少Y轴舵机角度 */
-                        g_servoy_duty -= 50;
-                        if (g_servoy_duty < SERVO_PWM_MIN) g_servoy_duty = SERVO_PWM_MIN;
-                        break;
+                        switch (current_task) {
+                            case 1:
+                                Task1_Reset_To_Ctr(); // 执行任务1
+                                break;
+                            case 2:
+                                Task2_Run(); // 执行任务2
+                                break;
+                            case 3:
+                                break;
+                            case 4:
+                                break;
+                        }
                 }
                 break;
             }
-            case TEST_MODE:
-                switch (key_val) {
-                    case USER_KEY:
-                        OLED_ChangeMode();
-                        break;
-                    case KEY_0:
-                        Task1_Reset_To_Ctr(); // 执行任务1
-                        break;
-                    case KEY_1:
-                        Task2_Run(); // 执行任务2
-                        break;
-                }
-                break;
         }
         if (g_oled_mode != TEST_MODE) {
             Servo_SetPulseWidth_DirX(g_servox_duty);

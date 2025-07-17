@@ -1,17 +1,19 @@
 #ifndef __OLED_USER_H
 #define __OLED_USER_H
 
+#include "stdint.h"
+
 typedef enum {
     CH_X_10,
-    CH_X_50,
     CH_Y_10,
-    CH_Y_50,
     TEST_MODE
 } OLED_Disp_t;
 
 extern OLED_Disp_t g_oled_mode;
+extern uint8_t current_task;
 
 void OLED_ChangeMode(void);
+void OLED_ChangeTask(void);
 void OLED_Display(void);
 
 #endif
