@@ -83,9 +83,9 @@ void Task3_Run(void)
 {
     const uint8_t laser_servo_step = 3;
     const uint8_t target_x = 12, target_y = 5;
-    const uint16_t step_delay = 200;
+    const uint16_t step_delay = 100;
 
-    while (fabs(g_laser_point_x - target_x) > 10) {
+    while (fabs(g_laser_point_x - target_x) > 2) {
         if (g_laser_point_x == 0) continue;
         if (g_laser_point_x < target_x) {
             g_servox_duty -= laser_servo_step;
@@ -97,7 +97,7 @@ void Task3_Run(void)
         Servo_SetPulseWidth_DirX(g_servox_duty);
         HAL_Delay(step_delay);
     }
-    while (fabs(g_laser_point_y - target_y) > 5) {
+    while (fabs(g_laser_point_y - target_y) > 2) {
         if (g_laser_point_y == 0) continue;
         if (g_laser_point_y < target_y) {
             g_servoy_duty += laser_servo_step;

@@ -20,6 +20,7 @@
 #include "uart_user.h"
 #include "usart.h"
 #include "gpio.h"
+#include "tim.h"
 #include "key.h"
 #include "servo.h"
 #include "oled_user.h"
@@ -60,7 +61,7 @@ static void Task_OLEDDisplay(void)
 }
 #endif
 
-#if 1
+#if 0
 /**
  * @brief UART数据处理任务
  */
@@ -68,6 +69,19 @@ static void Task_UartProcess(void)
 {
     /* 调用原有的UART数据处理函数 */
     Uart_DataProcess();
+}
+#endif
+
+#if 1
+/**
+ * @brief 中断执行Uart数据处理
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM6) {
+        // 在这里编写你需要每50ms执行一次的代码
+        Uart_DataProcess();
+    }
 }
 #endif
 
@@ -98,7 +112,7 @@ void AppTasks_Init(void)
     TaskScheduler_Init();
     /* 添加任务到调度器 */
     /* 参数：任务函数, 执行周期(ms), 优先级, 任务名称 */
-    TaskScheduler_AddTask(Task_UartProcess, 10, TASK_PRIORITY_HIGH, "UART_Task");
+    // TaskScheduler_AddTask(Task_UartProcess, 10, TASK_PRIORITY_HIGH, "UART_Task");
     TaskScheduler_AddTask(Key_Proc, 20, TASK_PRIORITY_NORMAL, "Key_Task");
     // TaskScheduler_AddTask(Task_ServoCtrl, 20, TASK_PRIORITY_NORMAL, "Servo_Task");
     TaskScheduler_AddTask(Task_OLEDDisplay, 100, TASK_PRIORITY_NORMAL, "OLED_Task");
