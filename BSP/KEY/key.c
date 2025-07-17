@@ -182,7 +182,7 @@ void Key_Proc(void)
                         break;
                     case KEY_0:
                         /* 微调增加X轴舵机角度 */
-                        g_servox_duty += 3;
+                        g_servox_duty += 10;
                         if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
                         break;
                     case KEY_1:
@@ -218,7 +218,7 @@ void Key_Proc(void)
                         break;
                     case KEY_0:
                         /* 微调增加Y轴舵机角度 */
-                        g_servoy_duty += 3;
+                        g_servoy_duty += 10;
                         if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
                         break;
                     case KEY_1:

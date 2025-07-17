@@ -2,8 +2,8 @@
 #include "servo_user.h"
 
 
-static uint16_t reset_x = SERVO_HORIZONTAL_CHX_DUTY; // X轴复位占空比
-static uint16_t reset_y = SERVO_HORIZONTAL_CHY_DUTY; // Y轴复位占空比
+static uint16_t reset_x = SERVO_VERTICAL_X_DUTY; // X轴复位占空比
+static uint16_t reset_y = SERVO_VERTICAL_Y_DUTY; // Y轴复位占空比
 
 static uint16_t T2_roll_1 = 1580;  // T2任务滚转角度1
 static uint16_t T2_roll_2 = 1390;  // T2任务滚转角度2

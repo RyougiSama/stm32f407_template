@@ -15,6 +15,6 @@
 
 void Task1_Reset_To_Ctr(void);
 void Task2_Run(void); 
-
+void CameraToServoPWM(int pixel_x, int pixel_y);
 
 #endif
