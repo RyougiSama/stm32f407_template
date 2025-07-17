@@ -20,8 +20,8 @@ void Task1_Reset_To_Ctr(void)
 {
     g_servox_duty = reset_x;
     g_servoy_duty = reset_y;
-    Servo_SetPulseWidth_X(reset_x); // Reset X-axis to center
-    Servo_SetPulseWidth_Y(reset_y); // Reset Y-axis to center
+    Servo_SetPulseWidth_DirY(reset_x); // Reset X-axis to center
+    Servo_SetPulseWidth_DirX(reset_y); // Reset Y-axis to center
     HAL_Delay(500);                 // Wait for servo to stabilize
 }
 
@@ -37,14 +37,14 @@ void Task2_Run(void)
     const uint16_t step_delay = 200, process_delay = 1000;
     uint16_t cnt = 0;
     /*start*/
-    Servo_SetPulseWidth_X(T2_pitch_1); // set X-axis to first position
-    Servo_SetPulseWidth_Y(T2_roll_1);  // set Y-axis to first position
+    Servo_SetPulseWidth_DirY(T2_pitch_1); // set X-axis to first position
+    Servo_SetPulseWidth_DirX(T2_roll_1);  // set Y-axis to first position
     HAL_Delay(process_delay);
     /*roll_1 -> roll_2*/
     while (T2_roll_1 - cnt > T2_roll_2) {
         cnt += 20;
-        Servo_SetPulseWidth_X(T2_pitch_1);      // Reset X-axis to center
-        Servo_SetPulseWidth_Y(T2_roll_1 - cnt); // Reset Y-axis to center
+        Servo_SetPulseWidth_DirY(T2_pitch_1);      // Reset X-axis to center
+        Servo_SetPulseWidth_DirX(T2_roll_1 - cnt); // Reset Y-axis to center
         HAL_Delay(step_delay);
     }
     cnt = 0;
@@ -52,8 +52,8 @@ void Task2_Run(void)
     HAL_Delay(process_delay);
     while (T2_pitch_1 + cnt < T2_pitch_2) {
         cnt += 20;
-        Servo_SetPulseWidth_X(T2_pitch_1 + cnt); // Reset X-axis to center
-        Servo_SetPulseWidth_Y(T2_roll_2);        // Reset Y-axis to center
+        Servo_SetPulseWidth_DirY(T2_pitch_1 + cnt); // Reset X-axis to center
+        Servo_SetPulseWidth_DirX(T2_roll_2);        // Reset Y-axis to center
         HAL_Delay(step_delay);
     }
     cnt = 0;
@@ -61,8 +61,8 @@ void Task2_Run(void)
     HAL_Delay(100);
     while (T2_roll_2 + cnt < T2_roll_1) {
         cnt += 20;
-        Servo_SetPulseWidth_X(T2_pitch_2);      // Reset X-axis to center
-        Servo_SetPulseWidth_Y(T2_roll_2 + cnt); // Reset Y-axis to center
+        Servo_SetPulseWidth_DirY(T2_pitch_2);      // Reset X-axis to center
+        Servo_SetPulseWidth_DirX(T2_roll_2 + cnt); // Reset Y-axis to center
         HAL_Delay(step_delay);
     }
     cnt = 0;
@@ -70,8 +70,8 @@ void Task2_Run(void)
     HAL_Delay(process_delay);
     while (T2_pitch_2 - cnt > T2_pitch_1) {
         cnt += 20;
-        Servo_SetPulseWidth_X(T2_pitch_2 - cnt); // Reset X-axis to center
-        Servo_SetPulseWidth_Y(T2_roll_1);        // Reset Y-axis to center
+        Servo_SetPulseWidth_DirY(T2_pitch_2 - cnt); // Reset X-axis to center
+        Servo_SetPulseWidth_DirX(T2_roll_1);        // Reset Y-axis to center
         HAL_Delay(step_delay);
     }
     HAL_Delay(process_delay);

@@ -19,6 +19,6 @@ void User_Init(void)
     OLED_Init();
     // 初始化舵机
     Servo_Init();
-    Servo_SetPulseWidth_X(SERVO_HORIZONTAL_CHX_DUTY);
-    Servo_SetPulseWidth_Y(SERVO_HORIZONTAL_CHY_DUTY);
+    Servo_SetPulseWidth_DirY(SERVO_HORIZONTAL_CHX_DUTY);
+    Servo_SetPulseWidth_DirX(SERVO_HORIZONTAL_CHY_DUTY);
 }

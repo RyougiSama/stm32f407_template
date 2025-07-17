@@ -29,7 +29,7 @@ static void Servo_SetCompare(uint16_t servo_channel, uint16_t compare)
  * 
  * @param angle 舵机角度 -90°到90°之间
  */
-void Servo_SetAngle_X(int16_t angle)
+void Servo_SetAngle_DirY(int16_t angle)
 {
     if (angle < -90 || angle > 90)
         return;
@@ -43,7 +43,7 @@ void Servo_SetAngle_X(int16_t angle)
  * 
  * @param pulse_width 500到2500之间
  */
-void Servo_SetPulseWidth_X(uint16_t pulse_width)
+void Servo_SetPulseWidth_DirY(uint16_t pulse_width)
 {
     if (pulse_width < SERVO_PWM_MIN || pulse_width > SERVO_PWM_MAX)
         return;
@@ -56,7 +56,7 @@ void Servo_SetPulseWidth_X(uint16_t pulse_width)
  * 
  * @param angle 舵机角度 -135°到135°之间
  */
-void Servo_SetAngle_Y(int16_t angle)
+void Servo_SetAngle_DirX(int16_t angle)
 {
     if (angle < -135 || angle > 135)
         return;
@@ -70,7 +70,7 @@ void Servo_SetAngle_Y(int16_t angle)
  * 
  * @param pulse_width 500到2500之间
  */
-void Servo_SetPulseWidth_Y(uint16_t pulse_width)
+void Servo_SetPulseWidth_DirX(uint16_t pulse_width)
 {
     if (pulse_width < SERVO_PWM_MIN || pulse_width > SERVO_PWM_MAX)
         return;

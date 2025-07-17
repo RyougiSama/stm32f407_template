@@ -26,9 +26,9 @@ typedef enum {
 } ServoChannel_t;
 
 void Servo_Init(void);
-void Servo_SetAngle_X(int16_t angle);
-void Servo_SetPulseWidth_X(uint16_t pulse_width);
-void Servo_SetAngle_Y(int16_t angle);
-void Servo_SetPulseWidth_Y(uint16_t pulse_width);
+void Servo_SetAngle_DirY(int16_t angle);
+void Servo_SetPulseWidth_DirY(uint16_t pulse_width);
+void Servo_SetAngle_DirX(int16_t angle);
+void Servo_SetPulseWidth_DirX(uint16_t pulse_width);
 
 #endif

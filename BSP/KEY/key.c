@@ -262,8 +262,8 @@ void Key_Proc(void)
                 break;
         }
         if (g_oled_mode != TEST_MODE) {
-            Servo_SetPulseWidth_X(g_servox_duty);
-            Servo_SetPulseWidth_Y(g_servoy_duty);
+            Servo_SetPulseWidth_DirY(g_servox_duty);
+            Servo_SetPulseWidth_DirX(g_servoy_duty);
         }
        /* 更新旧按键值 */
         key_val_old = key_val;

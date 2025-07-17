@@ -38,7 +38,7 @@ static void Task_ServoCtrl(void)
     PID_SetTarget(&g_servo_position_pid, target_angle);
     float servo_output = PID_Compute(&g_servo_position_pid, current_angle);
     // 4. 将 PID 输出应用到舵机
-    Servo_SetAngle_X((int16_t)servo_output);
+    Servo_SetAngle_DirY((int16_t)servo_output);
 }
 #endif
 
