@@ -81,32 +81,46 @@ void Task2_Run(void)
 uint8_t g_laser_point_x, g_laser_point_y; // Laser point coordinates
 void Task3_Run(void)
 {
-    const uint8_t laser_servo_step = 3;
-    const uint8_t target_x = 12, target_y = 5;
-    const uint16_t step_delay = 100;
-
-    while (fabs(g_laser_point_x - target_x) > 2) {
-        if (g_laser_point_x == 0) continue;
-        if (g_laser_point_x < target_x) {
-            g_servox_duty -= laser_servo_step;
-            if (g_servox_duty < SERVO_PWM_MIN) g_servox_duty = SERVO_PWM_MIN;
-        } else {
-            g_servox_duty += laser_servo_step;
-            if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
+    const uint8_t laser_servo_step = 1;
+    const uint8_t target_x = 27, target_y = 16;
+    const uint8_t pos_error = 0; // 定义位置误差允许范围
+    const uint16_t step_delay = 30;
+    uint8_t x_done = 0, y_done = 0;
+    // 继续循环直到 X 轴和 Y 轴都到达目标位置
+    while (!x_done || !y_done) {
+        // 处理 X 轴一步
+        if (!x_done) {
+            if (g_laser_point_x == 0) {
+                // 如果没有有效数据则跳过本次 X 轴调整
+            } else if (fabs(g_laser_point_x - target_x) <= pos_error) {
+                x_done = 1; // X 轴到达目标位置
+            } else if (g_laser_point_x < target_x) {
+                g_servox_duty -= laser_servo_step;
+                if (g_servox_duty < SERVO_PWM_MIN) g_servox_duty = SERVO_PWM_MIN;
+                Servo_SetPulseWidth_DirX(g_servox_duty);
+            } else {
+                g_servox_duty += laser_servo_step;
+                if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
+                Servo_SetPulseWidth_DirX(g_servox_duty);
+            }
+            HAL_Delay(step_delay);
         }
-        Servo_SetPulseWidth_DirX(g_servox_duty);
-        HAL_Delay(step_delay);
-    }
-    while (fabs(g_laser_point_y - target_y) > 2) {
-        if (g_laser_point_y == 0) continue;
-        if (g_laser_point_y < target_y) {
-            g_servoy_duty += laser_servo_step;
-            if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
-        } else {
-            g_servoy_duty -= laser_servo_step;
-            if (g_servoy_duty < SERVO_PWM_MIN) g_servoy_duty = SERVO_PWM_MIN;
+        // 处理 Y 轴一步
+        if (!y_done) {
+            if (g_laser_point_y == 0) {
+                // 如果没有有效数据则跳过本次 Y 轴调整
+            } else if (fabs(g_laser_point_y - target_y) <= pos_error) {
+                y_done = 1; // Y 轴到达目标位置
+            } else if (g_laser_point_y < target_y) {
+                g_servoy_duty += laser_servo_step;
+                if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
+                Servo_SetPulseWidth_DirY(g_servoy_duty);
+            } else {
+                g_servoy_duty -= laser_servo_step;
+                if (g_servoy_duty < SERVO_PWM_MIN) g_servoy_duty = SERVO_PWM_MIN;
+                Servo_SetPulseWidth_DirY(g_servoy_duty);
+            }
+            HAL_Delay(step_delay);
         }
-        Servo_SetPulseWidth_DirY(g_servoy_duty);
-        HAL_Delay(step_delay);
     }
 }
