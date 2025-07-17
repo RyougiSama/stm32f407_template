@@ -182,7 +182,7 @@ void Key_Proc(void)
                         break;
                     case KEY_0:
                         /* 微调增加X轴舵机角度 */
-                        g_servox_duty += 10;
+                        g_servox_duty += 3;
                         if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
                         break;
                     case KEY_1:
@@ -218,7 +218,7 @@ void Key_Proc(void)
                         break;
                     case KEY_0:
                         /* 微调增加Y轴舵机角度 */
-                        g_servoy_duty += 10;
+                        g_servoy_duty += 3;
                         if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
                         break;
                     case KEY_1:
@@ -261,9 +261,11 @@ void Key_Proc(void)
                 }
                 break;
         }
-        Servo_SetPulseWidth_X(g_servox_duty);
-        Servo_SetPulseWidth_Y(g_servoy_duty);
-        /* 更新旧按键值 */
+        if (g_oled_mode != TEST_MODE) {
+            Servo_SetPulseWidth_X(g_servox_duty);
+            Servo_SetPulseWidth_Y(g_servoy_duty);
+        }
+       /* 更新旧按键值 */
         key_val_old = key_val;
     }
     /* 当按键释放时，重置key_val_old */

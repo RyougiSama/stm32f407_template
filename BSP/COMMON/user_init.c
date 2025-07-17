@@ -3,7 +3,7 @@
 #include "uart_user.h"
 #include "app_tasks.h"
 #include "oled_hardware_spi.h"
-#include "servo.h"
+#include "servo_user.h"
 /**
  * @brief 用户自定义初始化函数
  * 
@@ -17,9 +17,8 @@ void User_Init(void)
     AppTasks_Init();
     // 初始化OLED显示
     OLED_Init();
-
     // 初始化舵机
     Servo_Init();
-    Servo_SetPulseWidth_X(SERVO_PWM_ANGLE_ZERO);
-    Servo_SetPulseWidth_Y(SERVO_PWM_ANGLE_ZERO);
+    Servo_SetPulseWidth_X(SERVO_HORIZONTAL_CHX_DUTY);
+    Servo_SetPulseWidth_Y(SERVO_HORIZONTAL_CHY_DUTY);
 }

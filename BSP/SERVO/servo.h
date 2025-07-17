@@ -18,6 +18,7 @@
 #define SERVO_PWM_MIN           500  // 舵机的最小占空比
 #define SERVO_PWM_ANGLE_ZERO    1500 // 舵机的0度占空比
 #define SERVO_PWM_MAX           2500 // 舵机的最大占空比
+#define SERVO_PWM_MIN_STEP      3    // 舵机最小步进占空比
 
 typedef enum {
     SERVO_CH_X = 1, // 通道1对应PA6
