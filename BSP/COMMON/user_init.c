@@ -19,8 +19,8 @@ void User_Init(void)
     OLED_Init();
     // 初始化舵机
     Servo_Init();
-    g_servox_duty = SERVO_VERTICAL_X_DUTY; // 设置X轴舵机初始占空比
-    g_servoy_duty = SERVO_VERTICAL_Y_DUTY; // 设置Y轴
-    Servo_SetPulseWidth_DirX(SERVO_VERTICAL_X_DUTY);
-    Servo_SetPulseWidth_DirY(SERVO_VERTICAL_Y_DUTY);
+    g_servox_duty = 1544;
+    g_servoy_duty = 1395;
+    Servo_SetPulseWidth_DirX(g_servox_duty);
+    Servo_SetPulseWidth_DirY(g_servoy_duty);
 }
