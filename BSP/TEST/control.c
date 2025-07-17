@@ -1,14 +1,14 @@
 #include "control.h"
 #include "servo_user.h"
+#include "math.h"
 
+static const uint16_t reset_x = SERVO_VERTICAL_X_DUTY; // X轴复位占空比
+static const uint16_t reset_y = SERVO_VERTICAL_Y_DUTY; // Y轴复位占空比
 
-static uint16_t reset_x = SERVO_VERTICAL_X_DUTY; // X轴复位占空比
-static uint16_t reset_y = SERVO_VERTICAL_Y_DUTY; // Y轴复位占空比
-
-static uint16_t T2_roll_1 = 1580;  // T2任务滚转角度1
-static uint16_t T2_roll_2 = 1390;  // T2任务滚转角度2
-static uint16_t T2_pitch_1 = 1410; // T2任务俯仰角度1
-static uint16_t T2_pitch_2 = 1690; // T2任务俯仰角度2
+static const uint16_t T2_roll_1 = 1580;  // T2任务滚转角度1
+static const uint16_t T2_roll_2 = 1390;  // T2任务滚转角度2
+static const uint16_t T2_pitch_1 = 1410; // T2任务俯仰角度1
+static const uint16_t T2_pitch_2 = 1690; // T2任务俯仰角度2
 
 /**
  * @brief  reset to center
@@ -20,8 +20,8 @@ void Task1_Reset_To_Ctr(void)
 {
     g_servox_duty = reset_x;
     g_servoy_duty = reset_y;
-    Servo_SetPulseWidth_DirY(reset_x); // Reset X-axis to center
-    Servo_SetPulseWidth_DirX(reset_y); // Reset Y-axis to center
+    Servo_SetPulseWidth_DirX(reset_x); // Reset X-axis to center
+    Servo_SetPulseWidth_DirY(reset_y); // Reset Y-axis to center
     HAL_Delay(500);                 // Wait for servo to stabilize
 }
 
@@ -31,7 +31,6 @@ void Task1_Reset_To_Ctr(void)
  *
  * @retval None
  */
-#if 1
 void Task2_Run(void)
 {
     const uint16_t step_delay = 200, process_delay = 1000;
@@ -77,4 +76,37 @@ void Task2_Run(void)
     HAL_Delay(process_delay);
     Task1_Reset_To_Ctr();
 }
-#endif
+
+
+uint8_t g_laser_point_x, g_laser_point_y; // Laser point coordinates
+void Task3_Run(void)
+{
+    const uint8_t laser_servo_step = 3;
+    const uint8_t target_x = 12, target_y = 5;
+    const uint16_t step_delay = 200;
+
+    while (fabs(g_laser_point_x - target_x) > 10) {
+        if (g_laser_point_x == 0) continue;
+        if (g_laser_point_x < target_x) {
+            g_servox_duty -= laser_servo_step;
+            if (g_servox_duty < SERVO_PWM_MIN) g_servox_duty = SERVO_PWM_MIN;
+        } else {
+            g_servox_duty += laser_servo_step;
+            if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
+        }
+        Servo_SetPulseWidth_DirX(g_servox_duty);
+        HAL_Delay(step_delay);
+    }
+    while (fabs(g_laser_point_y - target_y) > 5) {
+        if (g_laser_point_y == 0) continue;
+        if (g_laser_point_y < target_y) {
+            g_servoy_duty += laser_servo_step;
+            if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
+        } else {
+            g_servoy_duty -= laser_servo_step;
+            if (g_servoy_duty < SERVO_PWM_MIN) g_servoy_duty = SERVO_PWM_MIN;
+        }
+        Servo_SetPulseWidth_DirY(g_servoy_duty);
+        HAL_Delay(step_delay);
+    }
+}

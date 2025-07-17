@@ -2,6 +2,7 @@
 #include "oled_hardware_spi.h"
 
 #include "servo_user.h"
+#include "control.h"
 
 OLED_Disp_t g_oled_mode = CH_X_10;
 uint8_t current_task = 1;
@@ -58,4 +59,6 @@ void OLED_Display(void)
         OLED_ShowNum(8*12, 4, g_servoy_duty, 4, 16);
         OLED_ShowString(0, 7, "Laser:", 8);
     }
+    OLED_ShowNum(6*12, 7, g_laser_point_x, 3, 8);
+    OLED_ShowNum(9*12, 7, g_laser_point_y, 3, 8);
 }

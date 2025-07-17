@@ -19,8 +19,8 @@ void User_Init(void)
     OLED_Init();
     // 初始化舵机
     Servo_Init();
-    g_servox_duty = 1544;
-    g_servoy_duty = 1395;
+    g_servox_duty = SERVO_PWM_ANGLE_ZERO;
+    g_servoy_duty = SERVO_PWM_ANGLE_ZERO;
     Servo_SetPulseWidth_DirX(g_servox_duty);
     Servo_SetPulseWidth_DirY(g_servoy_duty);
 }

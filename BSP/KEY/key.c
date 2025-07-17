@@ -228,6 +228,7 @@ void Key_Proc(void)
                                 Task2_Run(); // 执行任务2
                                 break;
                             case 3:
+                                Task3_Run(); // 执行任务3
                                 break;
                             case 4:
                                 break;

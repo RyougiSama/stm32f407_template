@@ -3,6 +3,8 @@
 #include "user_init.h"
 #include "usart.h"
 
+#include "control.h"
+
 uint8_t g_uart_command_buffer[UART_USER_BUFFER_SIZE]; // UART command buffer
 
 /**
@@ -14,8 +16,9 @@ void Uart_DataProcess(void)
     uint8_t command_length = Command_GetCommand(g_uart_command_buffer);
     // 收到正确格式数据包时的解析
     if (command_length) {
-        printf("Received command:");
-        HAL_UART_Transmit_DMA(&huart1, g_uart_command_buffer, command_length);
+        // HAL_UART_Transmit_DMA(&huart1, g_uart_command_buffer, command_length);
+        g_laser_point_x = g_uart_command_buffer[2];
+        g_laser_point_y = g_uart_command_buffer[3];
     }
 }
 
