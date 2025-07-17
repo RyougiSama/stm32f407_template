@@ -1,6 +1,7 @@
 #include "control.h"
 #include "servo_user.h"
 #include "math.h"
+#include "pid_controller.h"
 
 static const uint16_t reset_x = SERVO_VERTICAL_X_DUTY; // X轴复位占空比
 static const uint16_t reset_y = SERVO_VERTICAL_Y_DUTY; // Y轴复位占空比
@@ -122,5 +123,145 @@ void Task3_Run(void)
             }
             HAL_Delay(step_delay);
         }
+    }
+}
+
+/**
+ * @brief 使用PID控制器实现激光点追踪
+ * @note 与Task3_Run功能相同，但使用PID控制以提高精度和稳定性
+ */
+void Task4_Run(void)
+{
+    // PID控制器定义
+    PidController_t pid_x, pid_y;
+    const uint8_t target_x = 27, target_y = 16;
+    const uint8_t pos_error = 2; // 增加误差允许范围，避免无法达到完美精度
+    const uint16_t step_delay = 100; // 增加延时，给系统更多响应时间
+    
+    // 初始化X轴PID控制器 - 调整参数以适应系统特性
+    PID_Init(&pid_x, PID_TYPE_POSITIONAL);
+    PID_SetParam(&pid_x, 0.8f, 0.01f, 0.4f); // 降低P值，增加D值以减少振荡
+    PID_SetOutputLimit(&pid_x, -3.0f, 3.0f); // 缩小输出范围，减少调整幅度
+    PID_SetIntegralLimit(&pid_x, -20.0f, 20.0f);
+    PID_SetTarget(&pid_x, target_x);
+    
+    // 初始化Y轴PID控制器 - 可能与X轴特性不同，单独调参
+    PID_Init(&pid_y, PID_TYPE_POSITIONAL);
+    PID_SetParam(&pid_y, 0.8f, 0.01f, 0.4f); // 降低P值，增加D值以减少振荡
+    PID_SetOutputLimit(&pid_y, -3.0f, 3.0f); // 缩小输出范围，减少调整幅度
+    PID_SetIntegralLimit(&pid_y, -20.0f, 20.0f);
+    PID_SetTarget(&pid_y, target_y);
+    // 继续循环直到 X 轴和 Y 轴都到达目标位置
+    uint8_t stable_count = 0;
+    const uint8_t required_stable_count = 5; // 降低稳定次数要求，避免难以达到稳定条件
+    uint8_t x_fine_tuning = 0, y_fine_tuning = 0; // 记录微调模式
+    float prev_x_error = 0, prev_y_error = 0; // 记录前一次误差，用于判断趋势
+    
+    // 添加超时机制
+    uint32_t start_time = HAL_GetTick();
+    const uint32_t max_runtime = 10000; // 10秒最大运行时间
+    
+    while (stable_count < required_stable_count) {
+        // 检查是否超时
+        if (HAL_GetTick() - start_time > max_runtime) {
+            break; // 超时退出
+        }
+        float x_output = 0, y_output = 0;
+        bool is_stable = true;
+        
+        // 处理 X 轴
+        if (g_laser_point_x != 0) {
+            float x_error = target_x - g_laser_point_x;
+            
+            // 检查是否接近目标，切换到微调模式
+            if (fabs(x_error) <= pos_error + 2) {
+                x_fine_tuning = 1;
+            }
+            
+            // 计算PID输出值
+            x_output = PID_Compute(&pid_x, g_laser_point_x);
+            
+            // 检查是否到达目标位置
+            if (fabs(x_error) > pos_error) {
+                is_stable = false;
+                
+                // 微调模式下使用更小的步长
+                if (x_fine_tuning) {
+                    // 检查误差趋势，防止振荡
+                    if ((x_error > 0 && prev_x_error < 0) || (x_error < 0 && prev_x_error > 0)) {
+                        x_output *= 0.5f; // 减小输出，防止过冲
+                    }
+                    
+                    // 对于小误差使用固定微小步长
+                    if (fabs(x_error) <= 3) {
+                        x_output = (x_error > 0) ? 0.5f : -0.5f;
+                    }
+                }
+                
+                // 反向计算，因为舵机控制与坐标系的方向关系
+                g_servox_duty += (int16_t)(-x_output);
+                
+                // 限制PWM范围
+                if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
+                if (g_servox_duty < SERVO_PWM_MIN) g_servox_duty = SERVO_PWM_MIN;
+                
+                // 设置舵机位置
+                Servo_SetPulseWidth_DirX(g_servox_duty);
+            }
+            
+            prev_x_error = x_error;
+        }
+        
+        // 处理 Y 轴
+        if (g_laser_point_y != 0) {
+            float y_error = target_y - g_laser_point_y;
+            
+            // 检查是否接近目标，切换到微调模式
+            if (fabs(y_error) <= pos_error + 2) {
+                y_fine_tuning = 1;
+            }
+            
+            // 计算PID输出值
+            y_output = PID_Compute(&pid_y, g_laser_point_y);
+            
+            // 检查是否到达目标位置
+            if (fabs(y_error) > pos_error) {
+                is_stable = false;
+                
+                // 微调模式下使用更小的步长
+                if (y_fine_tuning) {
+                    // 检查误差趋势，防止振荡
+                    if ((y_error > 0 && prev_y_error < 0) || (y_error < 0 && prev_y_error > 0)) {
+                        y_output *= 0.5f; // 减小输出，防止过冲
+                    }
+                    
+                    // 对于小误差使用固定微小步长
+                    if (fabs(y_error) <= 3) {
+                        y_output = (y_error > 0) ? 0.5f : -0.5f;
+                    }
+                }
+                
+                // Y轴与X轴方向相反
+                g_servoy_duty += (int16_t)(y_output);
+                
+                // 限制PWM范围
+                if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
+                if (g_servoy_duty < SERVO_PWM_MIN) g_servoy_duty = SERVO_PWM_MIN;
+                
+                // 设置舵机位置
+                Servo_SetPulseWidth_DirY(g_servoy_duty);
+            }
+            
+            prev_y_error = y_error;
+        }
+        
+        // 检查稳定性
+        if (is_stable && g_laser_point_x != 0 && g_laser_point_y != 0) {
+            stable_count++;
+        } else {
+            stable_count = 0;
+        }
+        
+        HAL_Delay(step_delay);
     }
 }

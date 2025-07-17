@@ -18,5 +18,6 @@ extern uint8_t g_laser_point_x, g_laser_point_y;
 void Task1_Reset_To_Ctr(void);
 void Task2_Run(void);
 void Task3_Run(void);
+void Task4_Run(void);
 
 #endif

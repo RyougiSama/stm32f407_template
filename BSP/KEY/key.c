@@ -5,7 +5,7 @@
 
 #include "control.h"
 
-/* °´¼üÏû¶¶ÊµÀı */
+/* æŒ‰é”®æ¶ˆæŠ–å®ä¾‹ */
 static KeyDebounce_t key_debounce;
 
 static KeyValue_t Key_GetNum(void)
@@ -26,9 +26,9 @@ static KeyValue_t Key_GetNum(void)
 }
 
 /**
- * @brief »ñÈ¡¾­¹ıÏû¶¶´¦ÀíµÄ°´¼üÖµ
+ * @brief è·å–ç»è¿‡æ¶ˆæŠ–å¤„ç†çš„æŒ‰é”®å€¼
  * 
- * @return KeyValue_t Ïû¶¶ºóµÄ°´¼üÖµ£¬KEY_NONE±íÊ¾ÎŞ°´¼ü£¬ÆäËûÖµ±íÊ¾ÓĞ°´¼ü°´ÏÂ
+ * @return KeyValue_t æ¶ˆæŠ–åçš„æŒ‰é”®å€¼ï¼ŒKEY_NONEè¡¨ç¤ºæ— æŒ‰é”®ï¼Œå…¶ä»–å€¼è¡¨ç¤ºæœ‰æŒ‰é”®æŒ‰ä¸‹
  */
 KeyValue_t Key_GetDebounced(void)
 {
@@ -44,7 +44,7 @@ KeyValue_t Key_GetDebounced(void)
             break;
         case KEY_STATE_PRESSED:
             if (raw_key == key_debounce.current_val) {
-                /* °´¼üÖµÎÈ¶¨£¬¼ì²éÊÇ·ñ´ïµ½Ïû¶¶Ê±¼ä */
+                /* å°†ç¼“å­˜ä¸­ä¸ºçš„keyå€¼ */
                 if (current_tick - key_debounce.debounce_timer >= KEY_DEBOUNCE_TIME) {
                     key_debounce.stable_val = key_debounce.current_val;
                     key_debounce.key_pressed = 1;
@@ -52,7 +52,7 @@ KeyValue_t Key_GetDebounced(void)
                     return key_debounce.stable_val;
                 }
             } else {
-                /* °´¼üÖµ±ä»¯£¬ÖØĞÂ¿ªÊ¼Ïû¶¶ */
+                /* æŒ‰é”®å€¼å˜åŒ–ï¼Œé‡æ–°å¼€å§‹æ¶ˆæŠ– */
                 if (raw_key == KEY_NONE) {
                     key_debounce.state = KEY_STATE_IDLE;
                 } else {
@@ -63,28 +63,28 @@ KeyValue_t Key_GetDebounced(void)
             break;
         case KEY_STATE_CONFIRMED:
             if (raw_key == KEY_NONE) {
-                /* °´¼üÊÍ·Å */
+                /* æŒ‰é”®é‡Šæ”¾ */
                 key_debounce.debounce_timer = current_tick;
                 key_debounce.state = KEY_STATE_RELEASED;
             }
             break;
         case KEY_STATE_RELEASED:
             if (raw_key == KEY_NONE) {
-                /* È·ÈÏ°´¼üÊÍ·Å */
+                /* ç¡®è®¤æŒ‰é”®é‡Šæ”¾ */
                 if (current_tick - key_debounce.debounce_timer >= KEY_DEBOUNCE_TIME) {
                     key_debounce.key_pressed = 0;
                     key_debounce.stable_val = KEY_NONE;
                     key_debounce.state = KEY_STATE_IDLE;
                 }
             } else {
-                /* °´¼ü»¹ÔÚ°´ÏÂ×´Ì¬ */
+                /* æŒ‰é”®ä»åœ¨æŒ‰ä¸‹çŠ¶æ€ */
                 key_debounce.current_val = raw_key;
                 key_debounce.debounce_timer = current_tick;
                 key_debounce.state = KEY_STATE_PRESSED;
             }
             break;
     }
-    return KEY_NONE;  /* ÎŞÎÈ¶¨°´¼ü */
+    return KEY_NONE;  /* æ— ç¨³å®šæŒ‰é”® */
 }
 
 #if 0
@@ -169,11 +169,10 @@ uint8_t Matrix_Key_Scan(void)
 void Key_Proc(void)
 {
     static KeyValue_t key_val_old = KEY_NONE;
-    /* »ñÈ¡Ïû¶¶ºóµÄ°´¼üÖµ */
+    /* è·å–ç»è¿‡æ¶ˆæŠ–çš„æŒ‰é”®å€¼ */
     KeyValue_t key_val = Key_GetDebounced();
-    /* Ö»ÓĞÔÚ°´¼üÖµ±ä»¯ÇÒ²»ÎªKEY_NONEÊ±²Å´¦Àí */
+    /* åªæœ‰åœ¨æŒ‰é”®å€¼å˜åŒ–ä¸”ä¸ä¸ºKEY_NONEæ—¶æ‰å¤„ç† */
     if (key_val != KEY_NONE && key_val != key_val_old) {
-        /* ¸ù¾İµ±Ç°ÏÔÊ¾Ä£Ê½´¦Àí°´¼ü */
         switch (g_oled_mode) {
             case CH_X_10: {
                 switch (key_val) {
@@ -181,12 +180,12 @@ void Key_Proc(void)
                         OLED_ChangeMode();
                         break;
                     case KEY_0:
-                        /* Ôö¼ÓXÖá¶æ»ú½Ç¶È */
+                        /* å¢åŠ Xèˆµæœºè§’åº¦ */
                         g_servox_duty += 10;
                         if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
                         break;
                     case KEY_1:
-                        /* ¼õÉÙXÖá¶æ»ú½Ç¶È */
+                        /* å‡å°‘Xèˆµæœºè§’åº¦ */
                         g_servox_duty -= 10;
                         if (g_servox_duty < SERVO_PWM_MIN) g_servox_duty = SERVO_PWM_MIN;
                         break;
@@ -199,12 +198,12 @@ void Key_Proc(void)
                         OLED_ChangeMode();
                         break;
                     case KEY_0:
-                        /* Ôö¼ÓYÖá¶æ»ú½Ç¶È */
+                        /* å¢åŠ Yèˆµæœºè§’åº¦ */
                         g_servoy_duty += 10;
                         if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
                         break;
                     case KEY_1:
-                        /* ¼õÉÙYÖá¶æ»ú½Ç¶È */
+                        /* å‡å°‘Yèˆµæœºè§’åº¦ */
                         g_servoy_duty -= 10;
                         if (g_servoy_duty < SERVO_PWM_MIN) g_servoy_duty = SERVO_PWM_MIN;
                         break;
@@ -222,15 +221,16 @@ void Key_Proc(void)
                     case KEY_1:
                         switch (current_task) {
                             case 1:
-                                Task1_Reset_To_Ctr(); // Ö´ĞĞÈÎÎñ1
+                                Task1_Reset_To_Ctr(); // æ‰§è¡Œä»»åŠ¡1
                                 break;
                             case 2:
-                                Task2_Run(); // Ö´ĞĞÈÎÎñ2
+                                Task2_Run(); // æ‰§è¡Œä»»åŠ¡2
                                 break;
                             case 3:
-                                Task3_Run(); // Ö´ĞĞÈÎÎñ3
+                                Task3_Run(); // æ‰§è¡Œä»»åŠ¡3
                                 break;
                             case 4:
+                                Task4_Run();
                                 break;
                         }
                 }
@@ -241,10 +241,10 @@ void Key_Proc(void)
             Servo_SetPulseWidth_DirX(g_servox_duty);
             Servo_SetPulseWidth_DirY(g_servoy_duty);
         }
-       /* ¸üĞÂ¾É°´¼üÖµ */
+       /* æ›´æ–°æ—§æŒ‰é”®å€¼ */
         key_val_old = key_val;
     }
-    /* µ±°´¼üÊÍ·ÅÊ±£¬ÖØÖÃkey_val_old */
+    /* å½“æŒ‰é”®é‡Šæ”¾æ—¶æ¸…é™¤æ—§key_val_old */
     if (key_val == KEY_NONE) {
         key_val_old = KEY_NONE;
     }
