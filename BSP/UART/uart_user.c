@@ -17,8 +17,19 @@ void Uart_DataProcess(void)
     // 收到正确格式数据包时的解析
     if (command_length) {
         // HAL_UART_Transmit_DMA(&huart1, g_uart_command_buffer, command_length);
-        g_laser_point_x = g_uart_command_buffer[2];
-        g_laser_point_y = g_uart_command_buffer[3];
+        g_laser_point.x = g_uart_command_buffer[2];
+        g_laser_point.y = g_uart_command_buffer[3];
+        if (!g_is_corner_init) {
+            g_lu_corner.x = g_uart_command_buffer[4];
+            g_lu_corner.y = g_uart_command_buffer[5];
+            g_ru_corner.x = g_uart_command_buffer[6];
+            g_ru_corner.y = g_uart_command_buffer[7];
+            g_rd_corner.x = g_uart_command_buffer[8];
+            g_rd_corner.y = g_uart_command_buffer[9];
+            g_ld_corner.x = g_uart_command_buffer[10];
+            g_ld_corner.y = g_uart_command_buffer[11];
+            g_is_corner_init = 1; // 标记角点已初始化
+        }
     }
 }
 
