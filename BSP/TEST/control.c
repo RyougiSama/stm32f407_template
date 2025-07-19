@@ -84,22 +84,10 @@ LaserPoint_t g_lu_corner, g_ru_corner, g_ld_corner, g_rd_corner; // Laser corner
 uint8_t g_is_corner_init;
 
 /**
- * @brief 任务3 - 使用PID控制器实现激光点追踪到默认目标位置
- * @note 调用通用的TrackPixelPoint函数
- */
-void Task3_Run(void)
-{
-    // 默认目标位置
-    LaserPoint_t default_target = {26, 17};
-    // 调用通用追踪函数
-    TrackPixelPoint(default_target);
-}
-
-/**
- * @brief 任务4 - 遍历矩形的四个角点，沿边沿移动
+ * @brief 任务3 - 遍历矩形的四个角点，沿边沿移动
  * @note 先追踪到左上角点，然后沿边沿移动，每次只改变X或Y坐标
  */
-void Task4_Run(void)
+void Task3_Run(void)
 {
     const uint16_t corner_delay = 500; // 到达每个角点后的停留时间
     const float pixel_to_pwm_ratio = 1.8f; // 像素到PWM的映射比例
@@ -123,6 +111,27 @@ void Task4_Run(void)
     // 沿边沿移动回左上角点 (左下 -> 左上，只改变Y坐标)
     MoveAlongEdge(g_lu_corner, 0, 1, pixel_to_pwm_ratio); // 只改变Y方向
     HAL_Delay(corner_delay);
+}
+
+/**
+ * @brief 任务4 - 遍历任意角度摆放的矩形的四条边
+ * @note 通过计算直线方程生成路径点，使用PID控制精确追踪
+ */
+void Task4_Run(void)
+{
+    // 检查角点是否已初始化
+    if (!g_is_corner_init) {
+        return; // 角点未初始化，直接返回
+    }
+    TrackPixelPoint(g_lu_corner); // 先追踪到左上角点
+
+    const uint8_t points_per_edge = 10; // 每条边生成的点数
+    const uint16_t point_delay = 200;   // 每个点的停留时间(ms)
+    // 遍历四条边：左上→右上→右下→左下→左上
+    TraverseRectangleEdge(g_lu_corner, g_ru_corner, points_per_edge, point_delay); // 边1: 左上→右上
+    TraverseRectangleEdge(g_ru_corner, g_rd_corner, points_per_edge, point_delay); // 边2: 右上→右下
+    TraverseRectangleEdge(g_rd_corner, g_ld_corner, points_per_edge, point_delay); // 边3: 右下→左下
+    TraverseRectangleEdge(g_ld_corner, g_lu_corner, points_per_edge, point_delay); // 边4: 左下→左上
 }
 
 /**
@@ -305,29 +314,31 @@ void TrackPixelPoint(LaserPoint_t target_point)
     // PID控制器定义
     PidController_t pid_x, pid_y;
     const uint8_t pos_error = 0; // 增加误差允许范围，避免无法达到完美精度
-    const uint16_t step_delay = 50; // 减少延时，提高响应速度
-    const uint8_t coarse_threshold = 10; // 粗调阈值，距离目标超过此值时使用大步长
+    const uint16_t step_delay = 60; // 增加延时，减少控制频率
+    const uint8_t coarse_threshold = 8; // 粗调阈值
     
-    // 初始化X轴PID控制器 - 调整参数以适应系统特性
+    // 初始化X轴PID控制器 - 更保守的参数设置
     PID_Init(&pid_x, PID_TYPE_POSITIONAL);
-    PID_SetParam(&pid_x, 1.2f, 0.02f, 0.5f); // 增加P值和I值，提高初始响应速度
-    PID_SetOutputLimit(&pid_x, -8.0f, 8.0f); // 增大输出范围，允许更大的初始调整幅度
-    PID_SetIntegralLimit(&pid_x, -20.0f, 20.0f);
+    PID_SetParam(&pid_x, 0.8f, 0.01f, 0.3f); // 降低P值和I值，减少振荡
+    PID_SetOutputLimit(&pid_x, -5.0f, 5.0f); // 减小输出范围
+    PID_SetIntegralLimit(&pid_x, -10.0f, 10.0f);
     PID_SetTarget(&pid_x, target_point.x);
-    // 初始化Y轴PID控制器 - 可能与X轴特性不同，单独调参
+    
+    // 初始化Y轴PID控制器 - 更保守的参数设置
     PID_Init(&pid_y, PID_TYPE_POSITIONAL);
-    PID_SetParam(&pid_y, 1.2f, 0.02f, 0.5f); // 增加P值和I值，提高初始响应速度
-    PID_SetOutputLimit(&pid_y, -8.0f, 8.0f); // 增大输出范围，允许更大的初始调整幅度
-    PID_SetIntegralLimit(&pid_y, -20.0f, 20.0f);
+    PID_SetParam(&pid_y, 0.8f, 0.01f, 0.3f); // 降低P值和I值，减少振荡
+    PID_SetOutputLimit(&pid_y, -5.0f, 5.0f); // 减小输出范围
+    PID_SetIntegralLimit(&pid_y, -10.0f, 10.0f);
     PID_SetTarget(&pid_y, target_point.y);
+    
     // 继续循环直到 X 轴和 Y 轴都到达目标位置
     uint8_t stable_count = 0;
-    const uint8_t required_stable_count = 5; // 降低稳定次数要求，避免难以达到稳定条件
+    const uint8_t required_stable_count = 8; // 增加稳定次数要求，确保真正稳定
     uint8_t x_fine_tuning = 0, y_fine_tuning = 0; // 记录微调模式
     float prev_x_error = 0, prev_y_error = 0; // 记录前一次误差，用于判断趋势
     // 添加超时机制
     uint32_t start_time = HAL_GetTick();
-    const uint32_t max_runtime = 6000; // 最大运行时间
+    const uint32_t max_runtime = 5000; // 增加最大运行时间
     while (stable_count < required_stable_count) {
         // 检查是否超时
         if (HAL_GetTick() - start_time > max_runtime) {
@@ -340,19 +351,19 @@ void TrackPixelPoint(LaserPoint_t target_point)
             float x_error = target_point.x - g_laser_point.x;
             float abs_x_error = fabs(x_error);
             
-            // 根据误差大小动态调整PID参数和输出限制
+            // 根据误差大小动态调整PID参数和输出限制 - 更温和的调整
             if (abs_x_error > coarse_threshold) {
-                // 粗调模式：距离目标较远时使用大步长
-                PID_SetParam(&pid_x, 1.5f, 0.03f, 0.6f);
-                PID_SetOutputLimit(&pid_x, -10.0f, 10.0f);
-            } else if (abs_x_error > 5) {
+                // 粗调模式：距离目标较远时使用中等步长
+                PID_SetParam(&pid_x, 1.0f, 0.015f, 0.35f);
+                PID_SetOutputLimit(&pid_x, -6.0f, 6.0f);
+            } else if (abs_x_error > 3) {
                 // 中等调整模式
-                PID_SetParam(&pid_x, 1.0f, 0.02f, 0.4f);
-                PID_SetOutputLimit(&pid_x, -5.0f, 5.0f);
+                PID_SetParam(&pid_x, 0.6f, 0.01f, 0.25f);
+                PID_SetOutputLimit(&pid_x, -3.0f, 3.0f);
             } else {
-                // 精调模式：接近目标时使用小步长
-                PID_SetParam(&pid_x, 0.6f, 0.01f, 0.3f);
-                PID_SetOutputLimit(&pid_x, -2.0f, 2.0f);
+                // 精调模式：接近目标时使用很小步长
+                PID_SetParam(&pid_x, 0.3f, 0.005f, 0.15f);
+                PID_SetOutputLimit(&pid_x, -1.0f, 1.0f);
                 x_fine_tuning = 1;
             }
             
@@ -363,15 +374,15 @@ void TrackPixelPoint(LaserPoint_t target_point)
             if (abs_x_error > pos_error) {
                 is_stable = false;
                 
-                // 微调模式下使用更小的步长
+                // 微调模式下使用更小的步长和额外的振荡抑制
                 if (x_fine_tuning) {
                     // 检查误差趋势，防止振荡
                     if ((x_error > 0 && prev_x_error < 0) || (x_error < 0 && prev_x_error > 0)) {
-                        x_output *= 0.5f; // 减小输出，防止过冲
+                        x_output *= 0.3f; // 大幅减小输出，防止过冲
                     }
                     // 对于小误差使用固定微小步长
-                    if (abs_x_error <= 3) {
-                        x_output = (x_error > 0) ? 0.5f : -0.5f;
+                    if (abs_x_error <= 2) {
+                        x_output = (x_error > 0) ? 0.3f : -0.3f;
                     }
                 }
                 
@@ -393,19 +404,19 @@ void TrackPixelPoint(LaserPoint_t target_point)
             float y_error = target_point.y - g_laser_point.y;
             float abs_y_error = fabs(y_error);
             
-            // 根据误差大小动态调整PID参数和输出限制
+            // 根据误差大小动态调整PID参数和输出限制 - 更温和的调整
             if (abs_y_error > coarse_threshold) {
-                // 粗调模式：距离目标较远时使用大步长
-                PID_SetParam(&pid_y, 1.5f, 0.03f, 0.6f);
-                PID_SetOutputLimit(&pid_y, -10.0f, 10.0f);
-            } else if (abs_y_error > 5) {
+                // 粗调模式：距离目标较远时使用中等步长
+                PID_SetParam(&pid_y, 1.0f, 0.015f, 0.35f);
+                PID_SetOutputLimit(&pid_y, -6.0f, 6.0f);
+            } else if (abs_y_error > 3) {
                 // 中等调整模式
-                PID_SetParam(&pid_y, 1.0f, 0.02f, 0.4f);
-                PID_SetOutputLimit(&pid_y, -5.0f, 5.0f);
+                PID_SetParam(&pid_y, 0.6f, 0.01f, 0.25f);
+                PID_SetOutputLimit(&pid_y, -3.0f, 3.0f);
             } else {
-                // 精调模式：接近目标时使用小步长
-                PID_SetParam(&pid_y, 0.6f, 0.01f, 0.3f);
-                PID_SetOutputLimit(&pid_y, -2.0f, 2.0f);
+                // 精调模式：接近目标时使用很小步长
+                PID_SetParam(&pid_y, 0.3f, 0.005f, 0.15f);
+                PID_SetOutputLimit(&pid_y, -1.0f, 1.0f);
                 y_fine_tuning = 1;
             }
             
@@ -416,15 +427,15 @@ void TrackPixelPoint(LaserPoint_t target_point)
             if (abs_y_error > pos_error) {
                 is_stable = false;
                 
-                // 微调模式下使用更小的步长
+                // 微调模式下使用更小的步长和额外的振荡抑制
                 if (y_fine_tuning) {
                     // 检查误差趋势，防止振荡
                     if ((y_error > 0 && prev_y_error < 0) || (y_error < 0 && prev_y_error > 0)) {
-                        y_output *= 0.5f; // 减小输出，防止过冲
+                        y_output *= 0.3f; // 大幅减小输出，防止过冲
                     }
                     // 对于小误差使用固定微小步长
-                    if (abs_y_error <= 3) {
-                        y_output = (y_error > 0) ? 0.5f : -0.5f;
+                    if (abs_y_error <= 2) {
+                        y_output = (y_error > 0) ? 0.3f : -0.3f;
                     }
                 }
                 
@@ -448,6 +459,231 @@ void TrackPixelPoint(LaserPoint_t target_point)
             stable_count = 0;
         }
         HAL_Delay(step_delay);
+    }
+}
+
+/**
+ * @brief 遍历矩形的一条边，生成直线上的点并使用PID追踪
+ * @param start_point 起始点坐标
+ * @param end_point 结束点坐标
+ * @param num_points 要生成的中间点数量
+ * @param point_delay 每个点的停留时间(ms)
+ */
+void TraverseRectangleEdge(LaserPoint_t start_point, LaserPoint_t end_point, uint8_t num_points, uint16_t point_delay)
+{
+    // 计算两点间的向量
+    int16_t delta_x = end_point.x - start_point.x;
+    int16_t delta_y = end_point.y - start_point.y;
+    
+    // 生成路径点并逐个追踪
+    for (uint8_t i = 0; i <= num_points; i++) {
+        // 使用线性插值计算当前点坐标
+        float t = (float)i / (float)num_points; // 插值参数，从0到1
+        
+        LaserPoint_t current_target;
+        // 修复类型转换问题：先计算浮点数结果，再转换为整数
+        float target_x_float = start_point.x + delta_x * t;
+        float target_y_float = start_point.y + delta_y * t;
+        
+        // 确保结果在有效范围内并转换为uint8_t
+        current_target.x = (uint8_t)(target_x_float < 0 ? 0 : (target_x_float > 255 ? 255 : target_x_float));
+        current_target.y = (uint8_t)(target_y_float < 0 ? 0 : (target_y_float > 255 ? 255 : target_y_float));
+        
+        // 使用PID控制器追踪到当前目标点
+        TrackPixelPointFast(current_target);
+        
+        // 在目标点停留一段时间
+        HAL_Delay(point_delay);
+    }
+}
+
+/**
+ * @brief 快速版本的PID像素点追踪函数（用于直线遍历）
+ * @param target_point 目标坐标点结构体
+ * @note 优化了参数以适应连续点追踪，减少了稳定等待时间
+ */
+void TrackPixelPointFast(LaserPoint_t target_point)
+{
+    // PID控制器定义
+    PidController_t pid_x, pid_y;
+    const uint8_t pos_error = 1; // 位置误差容忍度
+    const uint16_t step_delay = 40; // 增加延时，减少控制频率
+    const uint8_t coarse_threshold = 6; // 降低粗调阈值
+    
+    // 初始化X轴PID控制器 - 减小参数避免振荡
+    PID_Init(&pid_x, PID_TYPE_POSITIONAL);
+    PID_SetParam(&pid_x, 0.8f, 0.01f, 0.2f); // 降低P值和D值
+    PID_SetOutputLimit(&pid_x, -4.0f, 4.0f); // 大幅减小输出范围
+    PID_SetIntegralLimit(&pid_x, -8.0f, 8.0f);
+    PID_SetTarget(&pid_x, target_point.x);
+    
+    // 初始化Y轴PID控制器 - 减小参数避免振荡
+    PID_Init(&pid_y, PID_TYPE_POSITIONAL);
+    PID_SetParam(&pid_y, 0.8f, 0.01f, 0.2f); // 降低P值和D值
+    PID_SetOutputLimit(&pid_y, -4.0f, 4.0f); // 大幅减小输出范围
+    PID_SetIntegralLimit(&pid_y, -8.0f, 8.0f);
+    PID_SetTarget(&pid_y, target_point.y);
+    
+    // 快速收敛控制循环
+    uint8_t stable_count = 0;
+    const uint8_t required_stable_count = 5; // 增加稳定次数要求
+    uint32_t start_time = HAL_GetTick();
+    const uint32_t max_runtime = 3000; // 增加运行时间容忍度
+    
+    while (stable_count < required_stable_count) {
+        // 检查是否超时
+        if (HAL_GetTick() - start_time > max_runtime) {
+            break;
+        }
+        
+        bool is_stable = true;
+        
+        // 处理 X 轴
+        if (g_laser_point.x != 0) {
+            float x_error = target_point.x - g_laser_point.x;
+            float abs_x_error = fabs(x_error);
+            
+            // 根据误差大小动态调整PID参数 - 更保守的参数
+            if (abs_x_error > coarse_threshold) {
+                PID_SetParam(&pid_x, 1.0f, 0.015f, 0.25f); // 减小所有参数
+                PID_SetOutputLimit(&pid_x, -5.0f, 5.0f);
+            } else if (abs_x_error > 2) {
+                PID_SetParam(&pid_x, 0.6f, 0.01f, 0.15f);
+                PID_SetOutputLimit(&pid_x, -3.0f, 3.0f);
+            } else {
+                PID_SetParam(&pid_x, 0.4f, 0.005f, 0.1f); // 极小的参数用于精调
+                PID_SetOutputLimit(&pid_x, -1.5f, 1.5f);
+            }
+            
+            // 计算PID输出并应用
+            if (abs_x_error > pos_error) {
+                is_stable = false;
+                float x_output = PID_Compute(&pid_x, g_laser_point.x);
+                
+                // 更新舵机PWM值
+                g_servox_duty += (int16_t)(-x_output);
+                
+                // 限制PWM范围
+                if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
+                if (g_servox_duty < SERVO_PWM_MIN) g_servox_duty = SERVO_PWM_MIN;
+                
+                // 设置舵机位置
+                Servo_SetPulseWidth_DirX(g_servox_duty);
+            }
+        }
+        
+        // 处理 Y 轴
+        if (g_laser_point.y != 0) {
+            float y_error = target_point.y - g_laser_point.y;
+            float abs_y_error = fabs(y_error);
+            
+            // 根据误差大小动态调整PID参数 - 更保守的参数
+            if (abs_y_error > coarse_threshold) {
+                PID_SetParam(&pid_y, 1.0f, 0.015f, 0.25f); // 减小所有参数
+                PID_SetOutputLimit(&pid_y, -5.0f, 5.0f);
+            } else if (abs_y_error > 2) {
+                PID_SetParam(&pid_y, 0.6f, 0.01f, 0.15f);
+                PID_SetOutputLimit(&pid_y, -3.0f, 3.0f);
+            } else {
+                PID_SetParam(&pid_y, 0.4f, 0.005f, 0.1f); // 极小的参数用于精调
+                PID_SetOutputLimit(&pid_y, -1.5f, 1.5f);
+            }
+            
+            // 计算PID输出并应用
+            if (abs_y_error > pos_error) {
+                is_stable = false;
+                float y_output = PID_Compute(&pid_y, g_laser_point.y);
+                
+                // 更新舵机PWM值
+                g_servoy_duty += (int16_t)(y_output);
+                
+                // 限制PWM范围
+                if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
+                if (g_servoy_duty < SERVO_PWM_MIN) g_servoy_duty = SERVO_PWM_MIN;
+                
+                // 设置舵机位置
+                Servo_SetPulseWidth_DirY(g_servoy_duty);
+            }
+        }
+        
+        // 检查稳定性
+        if (is_stable && g_laser_point.x != 0 && g_laser_point.y != 0) {
+            stable_count++;
+        } else {
+            stable_count = 0;
+        }
+        
+        HAL_Delay(step_delay);
+    }
+}
+
+/**
+ * @brief 计算两点间的欧几里得距离
+ * @param p1 第一个点
+ * @param p2 第二个点
+ * @return 两点间的距离
+ */
+float CalculateDistance(LaserPoint_t p1, LaserPoint_t p2)
+{
+    float dx = p2.x - p1.x;
+    float dy = p2.y - p1.y;
+    return sqrt(dx * dx + dy * dy);
+}
+
+/**
+ * @brief 高精度遍历矩形边（自适应点数版本）
+ * @param start_point 起始点坐标
+ * @param end_point 结束点坐标
+ * @param points_per_unit 每个像素单位的点数密度
+ * @param point_delay 每个点的停留时间(ms)
+ */
+void TraverseRectangleEdgeAdaptive(LaserPoint_t start_point, LaserPoint_t end_point, float points_per_unit, uint16_t point_delay)
+{
+    // 计算边长并确定点数
+    float edge_length = CalculateDistance(start_point, end_point);
+    uint8_t num_points = (uint8_t)(edge_length * points_per_unit);
+    
+    // 限制点数范围
+    if (num_points < 5) num_points = 5;     // 最少5个点
+    if (num_points > 20) num_points = 20;   // 最多20个点
+    
+    // 调用标准遍历函数
+    TraverseRectangleEdge(start_point, end_point, num_points, point_delay);
+}
+
+/**
+ * @brief 调试函数：验证直线插值算法的正确性
+ * @param start_point 起始点坐标
+ * @param end_point 结束点坐标
+ * @param num_points 要生成的中间点数量
+ * @note 此函数仅用于调试，会通过某种方式输出计算结果（比如通过UART或调试器）
+ */
+void DebugTraverseRectangleEdge(LaserPoint_t start_point, LaserPoint_t end_point, uint8_t num_points)
+{
+    // 计算两点间的向量
+    int16_t delta_x = end_point.x - start_point.x;
+    int16_t delta_y = end_point.y - start_point.y;
+    
+    // 输出调试信息（您可以根据实际情况修改输出方式）
+    // printf("Debug: Start(%d,%d) -> End(%d,%d), Delta(%d,%d)\n", 
+    //        start_point.x, start_point.y, end_point.x, end_point.y, delta_x, delta_y);
+    
+    // 生成并输出所有插值点
+    for (uint8_t i = 0; i <= num_points; i++) {
+        // 使用线性插值计算当前点坐标
+        float t = (float)i / (float)num_points;
+        
+        // 计算插值点
+        float target_x_float = start_point.x + delta_x * t;
+        float target_y_float = start_point.y + delta_y * t;
+        
+        // 转换为最终坐标
+        uint8_t target_x = (uint8_t)(target_x_float < 0 ? 0 : (target_x_float > 255 ? 255 : target_x_float));
+        uint8_t target_y = (uint8_t)(target_y_float < 0 ? 0 : (target_y_float > 255 ? 255 : target_y_float));
+        
+        // 输出调试信息（您可以根据实际情况修改输出方式）
+        // printf("Point %d: t=%.3f, Float(%.1f,%.1f) -> Final(%d,%d)\n", 
+        //        i, t, target_x_float, target_y_float, target_x, target_y);
     }
 }
 
