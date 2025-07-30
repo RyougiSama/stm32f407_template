@@ -26,16 +26,9 @@ void User_Init(void)
     OLED_Init();
     // 初始化舵机
     Servo_Init();
-    Servo_SetPulseWidth_DirX(SERVO_PWM_ANGLE_ZERO);
-    Servo_SetPulseWidth_DirY(SERVO_PWM_ANGLE_ZERO);
-    // g_servox_duty = SERVO_PWM_ANGLE_ZERO;
-    // g_servoy_duty = SERVO_PWM_ANGLE_ZERO;
-    // Servo_SetPulseWidth_DirX(g_servox_duty);
-    // delay_ms(200);
-    // Servo_SetPulseWidth_DirY(g_servoy_duty);
-    // delay_ms(200);
-    // // Task_Draw();
-    // Task_DrawShape();
+    // 初始化GPIO输出
+    HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_RESET);
     // while (true) {
     //     HAL_GPIO_TogglePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin);
     //     HAL_Delay(500);
