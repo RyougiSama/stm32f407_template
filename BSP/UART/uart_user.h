@@ -18,7 +18,7 @@
 
 #define UART_USER_BUFFER_SIZE 50
 
-extern DMA_HandleTypeDef hdma_usart1_rx;
+extern DMA_HandleTypeDef hdma_usart2_rx;
 
 extern uint8_t g_uart_command_buffer[UART_USER_BUFFER_SIZE]; // UART command buffer
 

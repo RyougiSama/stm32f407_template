@@ -79,7 +79,7 @@ static void Task_UartProcess(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM6) {
-        // 在这里编写你需要每50ms执行一次的代码
+        // 每20ms执行一次
         Uart_DataProcess();
     }
 }
