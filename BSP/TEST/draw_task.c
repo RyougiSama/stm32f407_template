@@ -110,8 +110,8 @@ void MoveToPoint(float target_x, float target_y, float distance, uint8_t num_ste
         (float)(g_servoy_duty - SERVO_PWM_MIN) * 180.0f / (SERVO_PWM_MAX - SERVO_PWM_MIN) - 90.0f;
 
     // 从角度反推当前坐标
-    float current_x = distance * tan(current_angle_x * PI / 180.0f);
-    float current_y = distance * tan(current_angle_y * PI / 180.0f);
+    float current_x = (float)(distance * tan(current_angle_x * PI / 180.0f));
+    float current_y = (float)(distance * tan(current_angle_y * PI / 180.0f));
 
     // 绘制从当前位置到目标位置的直线
     DrawLine(current_x, current_y, target_x, target_y, distance, num_steps, step_delay);

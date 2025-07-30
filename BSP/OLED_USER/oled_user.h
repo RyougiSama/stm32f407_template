@@ -2,9 +2,10 @@
 #define __OLED_USER_H
 
 #include "stdint.h"
+#include "oled.h"
 
 typedef enum {
-    CH_X_10,
+    DISP_CENTER_POINT,
     CH_Y_10,
     TEST_MODE
 } OLED_Disp_t;

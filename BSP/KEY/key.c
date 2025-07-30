@@ -2,7 +2,7 @@
 #include "task_scheduler.h"
 #include "servo_user.h"
 #include "oled_user.h"
-
+#include "laser_shot_common.h"
 #include "control.h"
 
 /* 按键消抖实例 */
@@ -174,10 +174,11 @@ void Key_Proc(void)
     /* 只有在按键值变化且不为KEY_NONE时才处理 */
     if (key_val != KEY_NONE && key_val != key_val_old) {
         switch (g_oled_mode) {
-            case CH_X_10: {
+            case DISP_CENTER_POINT: {
                 switch (key_val) {
                     case USER_KEY:
-                        OLED_ChangeMode();
+                        // OLED_ChangeMode();
+                        Task_BasicQ2();
                         break;
                     case KEY_0:
                         /* 增加X舵机角度 */

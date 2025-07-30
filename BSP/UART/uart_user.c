@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "command.h"
-#include "control.h"
+#include "laser_shot_common.h"
 #include "usart.h"
 #include "user_init.h"
 
@@ -18,8 +18,8 @@ void Uart_DataProcess(void)
     uint8_t command_length = Command_GetCommand(g_uart_command_buffer);
     // 收到正确格式数据包时的解析
     if (command_length) {
-        
-        HAL_UART_Transmit_IT(&huart2, g_uart_command_buffer, command_length);
+        g_curr_center_point.x = (g_uart_command_buffer[2] << 8) | g_uart_command_buffer[3];
+        g_curr_center_point.y = (g_uart_command_buffer[4] << 8) | g_uart_command_buffer[5];
     }
 }
 
