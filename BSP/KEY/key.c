@@ -178,7 +178,7 @@ void Key_Proc(void)
                 switch (key_val) {
                     case USER_KEY:
                         // OLED_ChangeMode();
-                        Task_BasicQ2();
+                        Task_BasicQ2_Start();
                         break;
                     case KEY_0:
                         /* 增加X舵机角度 */

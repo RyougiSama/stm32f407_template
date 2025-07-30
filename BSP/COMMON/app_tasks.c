@@ -15,15 +15,16 @@
  ******************************************************************************
  */
 
-#include <stdio.h>
 #include "app_tasks.h"
-#include "uart_user.h"
-#include "usart.h"
+
+#include <stdio.h>
+
 #include "gpio.h"
-#include "tim.h"
 #include "key.h"
-#include "servo.h"
 #include "oled_user.h"
+#include "tim.h"
+#include "uart_user.h"
+#include "laser_shot_common.h"
 
 /* 任务函数实现 */
 #if 0
@@ -53,7 +54,7 @@ static void Task_KeyProcess(void)
 #if 1
 /**
  * @brief OLED显示任务
- * 
+ *
  */
 static void Task_OLEDDisplay(void)
 {
@@ -74,14 +75,23 @@ static void Task_UartProcess(void)
 
 #if 1
 /**
- * @brief 中断执行Uart数据处理
+ * @brief 中断执行UART数据处理
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM6) {
-        // 每20ms执行一次
+        // 每10ms执行一次
         Uart_DataProcess();
     }
+}
+
+/**
+ * @brief 云台追踪控制任务
+ */
+static void Task_TrackControl(void)
+{
+    // 执行云台追踪控制
+    Task_BasicQ2_Excute();
 }
 #endif
 
@@ -115,7 +125,8 @@ void AppTasks_Init(void)
     // TaskScheduler_AddTask(Task_UartProcess, 10, TASK_PRIORITY_HIGH, "UART_Task");
     TaskScheduler_AddTask(Key_Proc, 20, TASK_PRIORITY_NORMAL, "Key_Task");
     // TaskScheduler_AddTask(Task_ServoCtrl, 20, TASK_PRIORITY_NORMAL, "Servo_Task");
-    TaskScheduler_AddTask(Task_OLEDDisplay, 50, TASK_PRIORITY_NORMAL, "OLED_Task");
+    // TaskScheduler_AddTask(Task_OLEDDisplay, 50, TASK_PRIORITY_NORMAL, "OLED_Task");
+    TaskScheduler_AddTask(Task_TrackControl, 20, TASK_PRIORITY_HIGH, "Track_Task");
     // TaskScheduler_AddTask(Task_SystemMonitor, 1000, TASK_PRIORITY_NORMAL, "Monitor_Task");
     /* 输出任务信息 */
     // printf("Task Scheduler Initialized with %d tasks\r\n", TaskScheduler_GetTaskCount());

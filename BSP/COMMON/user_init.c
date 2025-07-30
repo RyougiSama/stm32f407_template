@@ -25,11 +25,13 @@ void User_Init(void)
     // 初始化应用任务
     AppTasks_Init();
     // 初始化OLED显示
-    OLED_Init();
-    OLED_Clear();
-    OLED_ShowString(0, 0, "OLED Init", 16);
+    // OLED_Init();
+    // OLED_Clear();
+    // OLED_ShowString(0, 0, "OLED Init", 16);
     // 初始化舵机
     Servo_Init();
+    Servo_SetPulseWidth_DirX(SERVO_PWM_ANGLE_ZERO);
+    Servo_SetPulseWidth_DirY(SERVO_PWM_ANGLE_ZERO);
     // 初始化GPIO输出
     HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, GPIO_PIN_SET);
     HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_RESET);

@@ -41,7 +41,7 @@ void Servo_SetAngle_DirY(float angle)
 /**
  * @brief 设置通道1舵机占空比
  * 
- * @param pulse_width 500到2500之间
+ * @param pulse_width 500到2500之间，增加向下，减少向上
  */
 void Servo_SetPulseWidth_DirY(uint16_t pulse_width)
 {
@@ -68,7 +68,7 @@ void Servo_SetAngle_DirX(float angle)
 /**
  * @brief 设置通道2舵机占空比
  * 
- * @param pulse_width 500到2500之间
+ * @param pulse_width 500到2500之间，增加逆时针，减少顺时针
  */
 void Servo_SetPulseWidth_DirX(uint16_t pulse_width)
 {

@@ -3,7 +3,7 @@
 // 指令的最小长度，修改该值以适配不同协议格式的长度
 #define COMMAND_MIN_LENGTH 4
 // 循环缓冲区大小，增大该值以降低缓冲区溢出的概率
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 512
 // 循环缓冲区
 static uint8_t buffer[BUFFER_SIZE];
 // 循环缓冲区读索引
