@@ -69,6 +69,8 @@ void Error_Handler(void);
 #define OLED_DC_GPIO_Port GPIOB
 #define USER_LED_Pin GPIO_PIN_2
 #define USER_LED_GPIO_Port GPIOB
+#define OUTPUT_TEST_Pin GPIO_PIN_11
+#define OUTPUT_TEST_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
