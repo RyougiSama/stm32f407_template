@@ -23,7 +23,11 @@ typedef enum {
     KEY_NONE = 0,
     KEY_0 = 1,
     KEY_1 = 2,
-    USER_KEY = 3
+    USER_KEY = 3,
+    KEY_S1,
+    KEY_S2,
+    KEY_S3,
+    KEY_S4
 } KeyValue_t;
 
 /* 按键状态定义 */

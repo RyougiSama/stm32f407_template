@@ -35,14 +35,11 @@ void User_Init(void)
     Servo_SetPulseWidth_DirY(SERVO_PWM_ANGLE_ZERO);
     // 初始化GPIO输出
     HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
     // while (true) {
     //     HAL_GPIO_TogglePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin);
     //     HAL_Delay(500);
     // }
-
     HAL_Delay(100);
     Emm_V5_En_Control(0, true, false);
-    HAL_Delay(50);
-    Emm_V5_Pos_Control(1, 0, 10, 5, 100, false, false);
 }

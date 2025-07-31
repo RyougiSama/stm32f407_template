@@ -11,16 +11,26 @@ static KeyDebounce_t key_debounce;
 static KeyValue_t Key_GetNum(void)
 {
     KeyValue_t key_num = KEY_NONE;
-    // Check Key 0 (PE4)
     if (HAL_GPIO_ReadPin(GPIOE, KEY_0_Pin) == GPIO_PIN_RESET) {
         key_num = KEY_0;
     }
-    // Check Key 1 (PE3)
     if (HAL_GPIO_ReadPin(GPIOE, KEY_1_Pin) == GPIO_PIN_RESET) {
         key_num = KEY_1;
     }
     if (HAL_GPIO_ReadPin(USER_KEY_GPIO_Port, USER_KEY_Pin) == GPIO_PIN_SET) {
         key_num = USER_KEY;
+    }
+    if (HAL_GPIO_ReadPin(COL1_GPIO_Port, COL1_Pin) == GPIO_PIN_RESET) {
+        key_num = KEY_S1;
+    }
+    if (HAL_GPIO_ReadPin(COL2_GPIO_Port, COL2_Pin) == GPIO_PIN_RESET) {
+        key_num = KEY_S2;
+    }
+    if (HAL_GPIO_ReadPin(COL3_GPIO_Port, COL3_Pin) == GPIO_PIN_RESET) {
+        key_num = KEY_S3;
+    }
+    if (HAL_GPIO_ReadPin(COL4_GPIO_Port, COL4_Pin) == GPIO_PIN_RESET) {
+        key_num = KEY_S4;
     }
     return key_num;
 }
@@ -173,6 +183,14 @@ void Key_Proc(void)
     KeyValue_t key_val = Key_GetDebounced();
     /* 只有在按键值变化且不为KEY_NONE时才处理 */
     if (key_val != KEY_NONE && key_val != key_val_old) {
+        // KeyValue_t curr_key_val = key_val; // 保存当前按键值
+        if (key_val == KEY_S1) {
+            HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
+        }
+        if (key_val == KEY_S2) {
+            HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_RESET);
+        }
+
         switch (g_oled_mode) {
             case DISP_CENTER_POINT: {
                 switch (key_val) {
