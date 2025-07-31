@@ -15,6 +15,12 @@
 
 #define CYCLE_CLK 3200
 
+#define STEP_MOTOR_Y 1
+#define STEP_MOTOR_X 2
+
+#define DIR_CW  0
+#define DIR_CCW 1
+
 #define ABS(x) ((x) > 0 ? (x) : -(x))
 
 typedef enum {

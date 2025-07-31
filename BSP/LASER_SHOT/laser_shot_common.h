@@ -2,8 +2,12 @@
 #define __LASER_SHOT_COMMON_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+
+#define ERROR_THRESHOLD_SMALL 10   // 小误差阈值
+#define ERROR_THRESHOLD_MEDIUM 50  // 中等误差阈值
 
 extern uint16_t g_sensor_width;
 extern uint16_t g_sensor_height;

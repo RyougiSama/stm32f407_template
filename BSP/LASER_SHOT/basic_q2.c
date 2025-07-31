@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "laser_shot_common.h"
 #include "oled_user.h"
 #include "servo_user.h"  // 添加舵机控制头文件
@@ -11,14 +9,13 @@ bool g_task_basic_q2_running = false;
 uint16_t g_sensor_width = 320;
 uint16_t g_sensor_height = 240;
 uint16_t g_sensor_aim_x = 160;
-uint16_t g_sensor_aim_y = 120;
+uint16_t g_sensor_aim_y = 100;
 
 // 步进控制相关参数
 #define PWM_STEP_SMALL 1           // 小步进值，微调用
 #define PWM_STEP_MEDIUM 3          // 中等步进值
 #define PWM_STEP_LARGE 5           // 大步进值，快速调整用
-#define ERROR_THRESHOLD_SMALL 10   // 小误差阈值
-#define ERROR_THRESHOLD_MEDIUM 50  // 中等误差阈值
+
 
 void Task_BasicQ2_Start(void)
 {

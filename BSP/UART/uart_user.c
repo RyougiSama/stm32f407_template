@@ -103,6 +103,8 @@ void Uart_DataProcess(void)
 
         // 更新全局坐标变量
         g_curr_center_point = filtered_point;
+        // g_curr_center_point.x = (g_uart_command_buffer[2] << 8) | g_uart_command_buffer[3];
+        // g_curr_center_point.y = (g_uart_command_buffer[4] << 8) | g_uart_command_buffer[5];
     }
 }
 
