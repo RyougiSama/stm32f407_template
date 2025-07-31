@@ -1,7 +1,8 @@
+#include <stdlib.h>
+
 #include "laser_shot_common.h"
 #include "oled_user.h"
-#include "servo_user.h"      // 添加舵机控制头文件
-#include <stdlib.h>
+#include "servo_user.h"  // 添加舵机控制头文件
 
 PixelPoint_t g_curr_center_point;
 bool g_task_basic_q2_running = false;
@@ -13,9 +14,9 @@ uint16_t g_sensor_aim_x = 160;
 uint16_t g_sensor_aim_y = 120;
 
 // 步进控制相关参数
-#define PWM_STEP_SMALL  1    // 小步进值，微调用
-#define PWM_STEP_MEDIUM 3    // 中等步进值
-#define PWM_STEP_LARGE  5    // 大步进值，快速调整用
+#define PWM_STEP_SMALL 1           // 小步进值，微调用
+#define PWM_STEP_MEDIUM 3          // 中等步进值
+#define PWM_STEP_LARGE 5           // 大步进值，快速调整用
 #define ERROR_THRESHOLD_SMALL 10   // 小误差阈值
 #define ERROR_THRESHOLD_MEDIUM 50  // 中等误差阈值
 
@@ -47,23 +48,23 @@ void Task_BasicQ2_Excute(void)
 
     // 根据误差大小选择步进值
     uint16_t step_x, step_y;
-    
+
     // X轴步进值选择
     if (abs(error_x) < ERROR_THRESHOLD_SMALL) {
-        step_x = PWM_STEP_SMALL;    // 小误差，小步进
+        step_x = PWM_STEP_SMALL;  // 小误差，小步进
     } else if (abs(error_x) < ERROR_THRESHOLD_MEDIUM) {
-        step_x = PWM_STEP_MEDIUM;   // 中等误差，中等步进
+        step_x = PWM_STEP_MEDIUM;  // 中等误差，中等步进
     } else {
-        step_x = PWM_STEP_LARGE;    // 大误差，大步进
+        step_x = PWM_STEP_LARGE;  // 大误差，大步进
     }
-    
+
     // Y轴步进值选择
     if (abs(error_y) < ERROR_THRESHOLD_SMALL) {
-        step_y = PWM_STEP_SMALL;    // 小误差，小步进
+        step_y = PWM_STEP_SMALL;  // 小误差，小步进
     } else if (abs(error_y) < ERROR_THRESHOLD_MEDIUM) {
-        step_y = PWM_STEP_MEDIUM;   // 中等误差，中等步进
+        step_y = PWM_STEP_MEDIUM;  // 中等误差，中等步进
     } else {
-        step_y = PWM_STEP_LARGE;    // 大误差，大步进
+        step_y = PWM_STEP_LARGE;  // 大误差，大步进
     }
 
     // 根据误差方向调整舵机PWM值
@@ -73,7 +74,7 @@ void Task_BasicQ2_Excute(void)
     } else if (error_x < 0) {
         g_servox_duty += step_x;  // 目标在左侧，舵机左转
     }
-    
+
     if (error_y > 0) {
         g_servoy_duty += step_y;  // 目标在下侧，舵机下转
     } else if (error_y < 0) {

@@ -90,8 +90,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  */
 static void Task_TrackControl(void)
 {
-    // 执行云台追踪控制
-    Task_BasicQ2_Excute();
+    Task_BasicQ2_WithZDT_Execute();
 }
 #endif
 
@@ -126,7 +125,7 @@ void AppTasks_Init(void)
     TaskScheduler_AddTask(Key_Proc, 20, TASK_PRIORITY_NORMAL, "Key_Task");
     // TaskScheduler_AddTask(Task_ServoCtrl, 20, TASK_PRIORITY_NORMAL, "Servo_Task");
     // TaskScheduler_AddTask(Task_OLEDDisplay, 50, TASK_PRIORITY_NORMAL, "OLED_Task");
-    TaskScheduler_AddTask(Task_TrackControl, 100, TASK_PRIORITY_HIGH, "Track_Task");
+    TaskScheduler_AddTask(Task_TrackControl, 50, TASK_PRIORITY_HIGH, "Track_Task");
     // TaskScheduler_AddTask(Task_SystemMonitor, 1000, TASK_PRIORITY_NORMAL, "Monitor_Task");
     /* 输出任务信息 */
     // printf("Task Scheduler Initialized with %d tasks\r\n", TaskScheduler_GetTaskCount());

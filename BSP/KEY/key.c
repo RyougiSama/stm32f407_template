@@ -1,9 +1,7 @@
 #include "key.h"
 #include "task_scheduler.h"
-#include "servo_user.h"
 #include "oled_user.h"
 #include "laser_shot_common.h"
-#include "control.h"
 
 /* 按键消抖实例 */
 static KeyDebounce_t key_debounce;
@@ -183,85 +181,19 @@ void Key_Proc(void)
     KeyValue_t key_val = Key_GetDebounced();
     /* 只有在按键值变化且不为KEY_NONE时才处理 */
     if (key_val != KEY_NONE && key_val != key_val_old) {
-        // KeyValue_t curr_key_val = key_val; // 保存当前按键值
-        if (key_val == KEY_S1) {
-            HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
-        }
-        if (key_val == KEY_S2) {
-            HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_RESET);
-        }
-
-        switch (g_oled_mode) {
-            case DISP_CENTER_POINT: {
-                switch (key_val) {
-                    case USER_KEY:
-                        // OLED_ChangeMode();
-                        Task_BasicQ2_Start();
-                        break;
-                    case KEY_0:
-                        /* 增加X舵机角度 */
-                        g_servox_duty += 10;
-                        if (g_servox_duty > SERVO_PWM_MAX) g_servox_duty = SERVO_PWM_MAX;
-                        break;
-                    case KEY_1:
-                        /* 减少X舵机角度 */
-                        g_servox_duty -= 10;
-                        if (g_servox_duty < SERVO_PWM_MIN) g_servox_duty = SERVO_PWM_MIN;
-                        break;
-                }
-                break;
+        switch (key_val)
+        {
+        case KEY_0:
+            if (Task_BasicQ2_WithZDT_IsRunning()) {
+                Task_BasicQ2_WithZDT_Stop();
+            } else {
+                Task_BasicQ2_WithZDT_Start();
+                g_task_basic_q2_with_zdt_start_time = TaskScheduler_GetSystemTick();
             }
-            case CH_Y_10: {
-                switch (key_val) {
-                    case USER_KEY:
-                        OLED_ChangeMode();
-                        break;
-                    case KEY_0:
-                        /* 增加Y舵机角度 */
-                        g_servoy_duty += 10;
-                        if (g_servoy_duty > SERVO_PWM_MAX) g_servoy_duty = SERVO_PWM_MAX;
-                        break;
-                    case KEY_1:
-                        /* 减少Y舵机角度 */
-                        g_servoy_duty -= 10;
-                        if (g_servoy_duty < SERVO_PWM_MIN) g_servoy_duty = SERVO_PWM_MIN;
-                        break;
-                }
-                break;
-            }
-            case TEST_MODE: {
-                switch (key_val) {
-                    case USER_KEY:
-                        OLED_ChangeMode();
-                        break;
-                    case KEY_0:
-                        OLED_ChangeTask();
-                        break;
-                    case KEY_1:
-                        switch (current_task) {
-                            case 1:
-                                Task1_Reset_To_Ctr(); // 执行任务1
-                                break;
-                            case 2:
-                                Task2_Run(); // 执行任务2
-                                break;
-                            case 3:
-                                Task3_Run(); // 执行任务3
-                                break;
-                            case 4:
-                                Task4_Run();
-                                break;
-                        }
-                }
-                break;
-            }
+            break;
+        default:
+            break;
         }
-        if (g_oled_mode != TEST_MODE) {
-            Servo_SetPulseWidth_DirX(g_servox_duty);
-            Servo_SetPulseWidth_DirY(g_servoy_duty);
-        }
-       /* 更新旧按键值 */
-        key_val_old = key_val;
     }
     /* 当按键释放时清除旧key_val_old */
     if (key_val == KEY_NONE) {
