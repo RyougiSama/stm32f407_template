@@ -3,7 +3,7 @@
 // 指令的最小长度，修改该值以适配不同协议格式的长度
 #define COMMAND_MIN_LENGTH 4
 // 循环缓冲区大小，增大该值以降低缓冲区溢出的概率
-#define BUFFER_SIZE 512
+#define BUFFER_SIZE 220
 // 循环缓冲区
 static uint8_t buffer[BUFFER_SIZE];
 // 循环缓冲区读索引
@@ -12,9 +12,9 @@ static uint8_t read_index = 0;
 static uint8_t write_index = 0;
 
 /**
-* @brief 增加读索引
-* @param length 要增加的长度
-*/
+ * @brief 增加读索引
+ * @param length 要增加的长度
+ */
 static void Command_AddReadIndex(uint8_t length)
 {
     read_index += length;
@@ -22,9 +22,9 @@ static void Command_AddReadIndex(uint8_t length)
 }
 
 /**
-* @brief 读取第i位数据 超过缓存区长度自动循环
-* @param i 要读取的数据索引
-*/
+ * @brief 读取第i位数据 超过缓存区长度自动循环
+ * @param i 要读取的数据索引
+ */
 static uint8_t Command_Read(uint8_t i)
 {
     uint8_t index = i % BUFFER_SIZE;
@@ -32,53 +32,64 @@ static uint8_t Command_Read(uint8_t i)
 }
 
 /**
-* @brief 计算未处理的数据长度
-* @return 未处理的数据长度
-* @retval 0 缓冲区为空
-* @retval 1~BUFFER_SIZE-1 未处理的数据长度
-* @retval BUFFER_SIZE 缓冲区已满
-*/
+ * @brief 计算未处理的数据长度
+ * @return 未处理的数据长度
+ * @retval 0 缓冲区为空
+ * @retval 1~BUFFER_SIZE-1 未处理的数据长度
+ * @retval BUFFER_SIZE 缓冲区已满
+ */
 static uint8_t Command_GetLength()
 {
-    return (write_index + BUFFER_SIZE - read_index) % BUFFER_SIZE;
+    // 读索引等于写索引时，缓冲区为空
+    if (read_index == write_index) {
+        return 0;
+    }
+    // 如果缓冲区已满,返回BUFFER_SIZE
+    if ((write_index + 1) % BUFFER_SIZE == read_index) {
+        return BUFFER_SIZE - 1;  // 实际可用空间比BUFFER_SIZE少1，避免满空无法区分
+    }
+    // 如果缓冲区未满,返回未处理的数据长度
+    if (read_index <= write_index) {
+        return write_index - read_index;
+    } else {
+        return BUFFER_SIZE - read_index + write_index;
+    }
 }
-//uint8_t Command_GetLength() {
-//  // 读索引等于写索引时，缓冲区为空
-//  if (read_index == write_index) {
-//    return 0;
-//  }
-//  // 如果缓冲区已满,返回BUFFER_SIZE
-//  if (write_index + 1 == read_index || (write_index == BUFFER_SIZE - 1 && read_index == 0)) {
-//    return BUFFER_SIZE;
-//  }
-//  // 如果缓冲区未满,返回未处理的数据长度
-//  if (read_index <= write_index) {
-//    return write_index - read_index;
-//  } else {
-//    return BUFFER_SIZE - read_index + write_index;
-//  }
-//}
-
-
+// uint8_t Command_GetLength() {
+//   // 读索引等于写索引时，缓冲区为空
+//   if (read_index == write_index) {
+//     return 0;
+//   }
+//   // 如果缓冲区已满,返回BUFFER_SIZE
+//   if (write_index + 1 == read_index || (write_index == BUFFER_SIZE - 1 && read_index == 0)) {
+//     return BUFFER_SIZE;
+//   }
+//   // 如果缓冲区未满,返回未处理的数据长度
+//   if (read_index <= write_index) {
+//     return write_index - read_index;
+//   } else {
+//     return BUFFER_SIZE - read_index + write_index;
+//   }
+// }
 
 /**
-* @brief 计算缓冲区剩余空间
-* @return 剩余空间
-* @retval 0 缓冲区已满
-* @retval 1~BUFFER_SIZE-1 剩余空间
-* @retval BUFFER_SIZE 缓冲区为空
-*/
+ * @brief 计算缓冲区剩余空间
+ * @return 剩余空间
+ * @retval 0 缓冲区已满
+ * @retval 1~BUFFER_SIZE-1 剩余空间
+ * @retval BUFFER_SIZE 缓冲区为空
+ */
 static uint8_t Command_GetRemain()
 {
     return BUFFER_SIZE - Command_GetLength();
 }
 
 /**
-* @brief 向缓冲区写入数据
-* @param data 要写入的数据指针
-* @param length 要写入的数据长度
-* @return 写入的数据长度
-*/
+ * @brief 向缓冲区写入数据
+ * @param data 要写入的数据指针
+ * @param length 要写入的数据长度
+ * @return 写入的数据长度
+ */
 uint8_t Command_Write(uint8_t *data, uint8_t length)
 {
     // 如果缓冲区不足 则不写入数据 返回0
@@ -99,11 +110,11 @@ uint8_t Command_Write(uint8_t *data, uint8_t length)
 }
 
 /**
-* @brief 尝试获取一条指令，重写该函数以适配指定协议格式
-* @param command 指令存放指针
-* @return 获取的指令长度
-* @retval 0 没有获取到指令
-*/
+ * @brief 尝试获取一条指令，重写该函数以适配指定协议格式
+ * @param command 指令存放指针
+ * @return 获取的指令长度
+ * @retval 0 没有获取到指令
+ */
 uint8_t Command_GetCommand(uint8_t *command)
 {
     // 寻找完整指令

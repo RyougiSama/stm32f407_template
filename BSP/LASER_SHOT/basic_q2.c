@@ -6,6 +6,12 @@
 PixelPoint_t g_curr_center_point;
 bool g_task_basic_q2_running = false;
 
+// 传感器相关全局变量定义
+uint16_t g_sensor_width = 320;
+uint16_t g_sensor_height = 240;
+uint16_t g_sensor_aim_x = 160;
+uint16_t g_sensor_aim_y = 120;
+
 // 步进控制相关参数
 #define PWM_STEP_SMALL  1    // 小步进值，微调用
 #define PWM_STEP_MEDIUM 3    // 中等步进值
@@ -29,8 +35,8 @@ void Task_BasicQ2_Excute(void)
     const uint16_t DEADZONE = 3;
 
     // 计算误差
-    int16_t error_x = g_curr_center_point.x - SENSOR_AIM_X;
-    int16_t error_y = g_curr_center_point.y - SENSOR_AIM_Y;
+    int16_t error_x = g_curr_center_point.x - g_sensor_aim_x;
+    int16_t error_y = g_curr_center_point.y - g_sensor_aim_y;
 
     // 如果误差在死区内，不做调整
     if (abs(error_x) < DEADZONE && abs(error_y) < DEADZONE) {

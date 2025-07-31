@@ -13,7 +13,7 @@ uint8_t g_uart_command_buffer[UART_USER_BUFFER_SIZE];  // UART command buffer
 // 中值滤波相关变量
 
 // 中值滤波相关变量
-#define FILTER_BUFFER_SIZE 5                           // 滤波缓冲区大小
+#define FILTER_BUFFER_SIZE 3                           // 滤波缓冲区大小
 static PixelPoint_t point_buffer[FILTER_BUFFER_SIZE];  // 坐标缓冲区
 static uint8_t buffer_index = 0;                       // 当前缓冲区索引
 static uint8_t buffer_filled = 0;                      // 缓冲区是否已填满

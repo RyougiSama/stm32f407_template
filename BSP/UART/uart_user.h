@@ -16,7 +16,7 @@
 #include "main.h"
 #include "stdio.h"
 
-#define UART_USER_BUFFER_SIZE 50
+#define UART_USER_BUFFER_SIZE 32
 
 extern DMA_HandleTypeDef hdma_usart2_rx;
 

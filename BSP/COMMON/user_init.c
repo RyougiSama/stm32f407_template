@@ -1,14 +1,15 @@
 #include "user_init.h"
 
+#include "Emm_V5.h"
 #include "app_tasks.h"
+#include "draw_task.h"
 #include "oled_user.h"
 #include "servo_user.h"
+#include "stdbool.h"
+#include "stdio.h"
 #include "tim.h"
 #include "uart_user.h"
 #include "usart.h"
-#include "stdbool.h"
-#include "draw_task.h"
-#include "stdio.h"
 
 /**
  * @brief 用户自定义初始化函数
@@ -39,4 +40,9 @@ void User_Init(void)
     //     HAL_GPIO_TogglePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin);
     //     HAL_Delay(500);
     // }
+
+    HAL_Delay(100);
+    Emm_V5_En_Control(0, true, false);
+    HAL_Delay(50);
+    Emm_V5_Pos_Control(1, 0, 10, 5, 100, false, false);
 }

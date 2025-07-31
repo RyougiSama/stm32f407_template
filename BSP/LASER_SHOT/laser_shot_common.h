@@ -5,10 +5,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define SENSOR_WIDTH  640
-#define SENSOR_HEIGHT 480
-#define SENSOR_AIM_X 320
-#define SENSOR_AIM_Y 240
+extern uint16_t g_sensor_width;
+extern uint16_t g_sensor_height;
+extern uint16_t g_sensor_aim_x;
+extern uint16_t g_sensor_aim_y;
 
 
 typedef struct {
