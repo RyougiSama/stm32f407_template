@@ -26,8 +26,9 @@ void User_Init(void)
     OLED_Init();
     OLED_Clear();
     // 初始化GPIO输出
-    HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
     HAL_Delay(100);
     Emm_V5_En_Control(0, true, false);
     HAL_Delay(20);
+    Emm_V5_Origin_Trigger_Return(STEP_MOTOR_Y, 0, false);
 }
