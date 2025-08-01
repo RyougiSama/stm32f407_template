@@ -184,13 +184,18 @@ void Key_Proc(void)
     /* 只有在按键值变化且不为KEY_NONE时才处理 */
     if (key_val != KEY_NONE && key_val != key_val_old) {
         if (key_val == KEY_S1) {
+            
             g_task_basic_q2_with_zdt_running = !g_task_basic_q2_with_zdt_running; // 切换任务状态
+            g_task_basic_q2_with_zdt_start_time = HAL_GetTick();
         } else if (key_val == KEY_S2) {
-            // Emm_V5_Origin_Set_O(STEP_MOTOR_Y, true);
-            // HAL_Delay(20);
+            // Emm_V5_Origin_Set_O(STEP_MOTOR_X, true);
+            Emm_V5_Origin_Trigger_Return(STEP_MOTOR_X, 0, false);
+            HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
+            HAL_Delay(20);
             // OLED_ShowString(0, 0, "OK", 16);
+        } else if (key_val == KEY_S3) {
+            Task_BasicQ3_Start();
         }
-
 
         #if 0
         if (key_val == KEY_S4 || key_val == USER_KEY) {

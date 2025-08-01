@@ -31,11 +31,11 @@ static uint16_t current_search_position = 0;  // 当前搜索位置
 static uint32_t q3_total_start_time = 0;      // 任务总运行时间计时器
 
 // 搜索参数
-#define X_SEARCH_VELOCITY 30      // 提高X轴搜索速度
+#define X_SEARCH_VELOCITY 20      // 提高X轴搜索速度
 #define X_SEARCH_ACC 10           // 提高加速度
-#define X_SEARCH_DIR DIR_CW       // 固定搜索方向
-#define X_SEARCH_STEP 200         // 每次搜索步长(脉冲数)
-#define X_SEARCH_MAX_PULSES 1600  // 最大搜索角度(约半圈)
+#define X_SEARCH_DIR DIR_CCW      // 固定搜索方向
+#define X_SEARCH_STEP 100         // 每次搜索步长(脉冲数)
+#define X_SEARCH_MAX_PULSES 3000  // 最大搜索角度(约半圈)
 
 // 追踪相关参数
 #define CLK_STEP_SMALL 5    // 提高小步进值
@@ -141,7 +141,7 @@ void Task_BasicQ3_Start(void)
     q3_state = Q3_STATE_INIT;
     homing_phase = HOMING_PHASE_Y;  // 从Y轴回零开始
     q3_last_time = TaskScheduler_GetSystemTick();
-    q3_total_start_time = 0;       // 重置总计时器，确保全新开始
+    q3_total_start_time = 0;  // 重置总计时器，确保全新开始
     search_started = false;
     current_search_position = 0;  // 重置搜索位置计数器
 
@@ -162,7 +162,7 @@ void Task_BasicQ3_Stop(void)
     search_started = false;
     current_search_position = 0;  // 重置搜索位置
     q3_total_start_time = 0;      // 重置总时间计时器
-    
+
     // 关闭输出指示GPIO
     HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_RESET);
 }
@@ -190,7 +190,7 @@ void Task_BasicQ3_Execute(void)
     }
 
     // 无论如何不超过4秒总时限
-    if (current_time - q3_total_start_time > 4000) {
+    if (current_time - q3_total_start_time > 8000) {
         Task_BasicQ3_Stop();
         q3_total_start_time = 0;
         return;

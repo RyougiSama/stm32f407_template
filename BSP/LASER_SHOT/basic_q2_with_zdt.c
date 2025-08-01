@@ -10,7 +10,7 @@ uint16_t g_sensor_width = 320;
 uint16_t g_sensor_height = 240;
 
 uint16_t g_sensor_aim_x = 155;
-uint16_t g_sensor_aim_y = 125;
+uint16_t g_sensor_aim_y = 140  ;
 
 // 步进控制相关参数
 #define CLK_STEP_SMALL  3            // 小步进值，微调用
