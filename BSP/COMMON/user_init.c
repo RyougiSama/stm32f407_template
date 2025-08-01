@@ -3,7 +3,6 @@
 #include "Emm_V5.h"
 #include "app_tasks.h"
 #include "oled_user.h"
-#include "servo_user.h"
 #include "stdbool.h"
 #include "stdio.h"
 #include "tim.h"

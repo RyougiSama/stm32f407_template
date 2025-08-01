@@ -1,6 +1,5 @@
 #include "oled_user.h"
 
-#include "control.h"
 #include "laser_shot_common.h"
 #include "Emm_V5.h"
 

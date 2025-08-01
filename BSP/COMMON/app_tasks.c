@@ -21,10 +21,10 @@
 
 #include "gpio.h"
 #include "key.h"
+#include "laser_shot_common.h"
 #include "oled_user.h"
 #include "tim.h"
 #include "uart_user.h"
-#include "laser_shot_common.h"
 
 /* 任务函数实现 */
 #if 0

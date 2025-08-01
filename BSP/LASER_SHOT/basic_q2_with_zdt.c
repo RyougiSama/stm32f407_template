@@ -5,6 +5,12 @@
 bool g_task_basic_q2_with_zdt_running = false;
 uint32_t g_task_basic_q2_with_zdt_start_time = 0;
 
+PixelPoint_t g_curr_center_point;
+uint16_t g_sensor_width = 320;
+uint16_t g_sensor_height = 240;
+uint16_t g_sensor_aim_x = 160;
+uint16_t g_sensor_aim_y = 120;
+
 // 步进控制相关参数
 #define CLK_STEP_SMALL  3            // 小步进值，微调用
 #define CLK_STEP_MEDIUM 5           // 中等步进值

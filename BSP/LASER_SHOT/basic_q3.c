@@ -12,19 +12,29 @@ typedef enum {
     Q3_STATE_COMPLETE    // 完成状态
 } Q3State_t;
 
+// 回零阶段定义
+typedef enum {
+    HOMING_PHASE_Y,      // Y轴回零阶段
+    HOMING_PHASE_CHECK,  // 检查矩形阶段
+    HOMING_PHASE_X,      // X轴回零阶段
+    HOMING_PHASE_DONE    // 回零完成阶段
+} HomingPhase_t;
+
 // 全局变量
 bool g_task_basic_q3_running = false;
 static Q3State_t q3_state = Q3_STATE_INIT;
+static HomingPhase_t homing_phase = HOMING_PHASE_Y;  // 当前回零阶段
 static uint32_t q3_last_time = 0;
-static uint32_t search_timeout_ms = 2500;  // 2.5秒搜索超时，留1.5秒追踪
-static bool search_started = false;        // 搜索启动标志
+static uint32_t search_timeout_ms = 2500;     // 2.5秒搜索超时，留1.5秒追踪
+static bool search_started = false;           // 搜索启动标志
 static uint16_t current_search_position = 0;  // 当前搜索位置
+static uint32_t q3_total_start_time = 0;      // 任务总运行时间计时器
 
 // 搜索参数
-#define X_SEARCH_VELOCITY 30  // 提高X轴搜索速度
-#define X_SEARCH_ACC 10       // 提高加速度
-#define X_SEARCH_DIR DIR_CW   // 固定搜索方向
-#define X_SEARCH_STEP 200     // 每次搜索步长(脉冲数)
+#define X_SEARCH_VELOCITY 30      // 提高X轴搜索速度
+#define X_SEARCH_ACC 10           // 提高加速度
+#define X_SEARCH_DIR DIR_CW       // 固定搜索方向
+#define X_SEARCH_STEP 200         // 每次搜索步长(脉冲数)
 #define X_SEARCH_MAX_PULSES 1600  // 最大搜索角度(约半圈)
 
 // 追踪相关参数
@@ -129,7 +139,9 @@ void Task_BasicQ3_Start(void)
 {
     g_task_basic_q3_running = true;
     q3_state = Q3_STATE_INIT;
+    homing_phase = HOMING_PHASE_Y;  // 从Y轴回零开始
     q3_last_time = TaskScheduler_GetSystemTick();
+    q3_total_start_time = 0;       // 重置总计时器，确保全新开始
     search_started = false;
     current_search_position = 0;  // 重置搜索位置计数器
 
@@ -144,9 +156,15 @@ void Task_BasicQ3_Stop(void)
     Emm_V5_Stop_Now(STEP_MOTOR_X, false);
     HAL_Delay(20);
     Emm_V5_Stop_Now(STEP_MOTOR_Y, false);
+    // 重置所有状态变量
     q3_state = Q3_STATE_INIT;
+    homing_phase = HOMING_PHASE_Y;  // 重置回零阶段
     search_started = false;
     current_search_position = 0;  // 重置搜索位置
+    q3_total_start_time = 0;      // 重置总时间计时器
+    
+    // 关闭输出指示GPIO
+    HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_RESET);
 }
 
 bool Task_BasicQ3_IsRunning(void)
@@ -157,10 +175,13 @@ bool Task_BasicQ3_IsRunning(void)
 void Task_BasicQ3_Execute(void)
 {
     if (!g_task_basic_q3_running) {
+        // 任务未运行时确保总计时器已重置（防御性编程）
+        if (q3_total_start_time != 0) {
+            q3_total_start_time = 0;
+        }
         return;
     }
 
-    static uint32_t q3_total_start_time = 0;
     uint32_t current_time = TaskScheduler_GetSystemTick();
 
     // 初始化总任务计时器
@@ -185,32 +206,80 @@ void Task_BasicQ3_Execute(void)
 
     switch (q3_state) {
         case Q3_STATE_INIT:
-            // 先检查是否已经能看到矩形，如果能直接跳到追踪状态
-            if (IsRectangleDetected()) {
-                q3_state = Q3_STATE_TRACKING;
-                break;
-            }
-            // 否则执行回零操作
-            // 只回零Y轴，X轴已在一侧极限位置
+            // 不先检查矩形，直接进入回零流程
+            // 先回零Y轴，调整到与目标相同的高度
             Emm_V5_Origin_Trigger_Return(STEP_MOTOR_Y, 0, false);
-            HAL_Delay(100);  // 增加延时，确保命令执行
+            HAL_Delay(100);  // 增加延时，确保命令发送
+
             // X轴位置设为初始值0
             current_search_position = 0;
+
+            // 重置所有计时器，确保任务能正常执行
+            q3_last_time = current_time;
+
+            // 进入回零状态
+            homing_phase = HOMING_PHASE_Y;
             q3_state = Q3_STATE_HOMING;
             break;
 
         case Q3_STATE_HOMING: {
             // 使用固定延时等待回零完成
             static uint32_t homing_start_time = 0;
+
+            // 首次进入当前阶段时初始化计时器
             if (homing_start_time == 0) {
                 homing_start_time = current_time;
             }
 
-            // 回零等待，然后无论如何进入搜索状态
-            if (current_time - homing_start_time > 100) {
-                homing_start_time = 0;
-                q3_last_time = current_time;  // 重置搜索计时器
-                q3_state = Q3_STATE_SEARCHING;
+            // 根据回零阶段执行不同操作
+            switch (homing_phase) {
+                case HOMING_PHASE_Y:
+                    // 等待Y轴回零完成(200ms)
+                    if (current_time - homing_start_time > 200) {
+                        homing_start_time = 0;              // 重置计时器
+                        homing_phase = HOMING_PHASE_CHECK;  // 进入检查矩形阶段
+                    }
+                    break;
+
+                case HOMING_PHASE_CHECK:
+                    // Y轴回零后检查矩形，给予足够的检测时间(100ms)
+                    // 首次进入检查阶段时等待一段时间让视觉系统稳定
+                    if (current_time - homing_start_time > 100) {
+                        // 短暂停止电机，确保视觉检测准确
+                        Emm_V5_Stop_Now(STEP_MOTOR_Y, false);
+                        HAL_Delay(50);  // 等待电机完全停止
+
+                        if (IsRectangleDetected()) {
+                            // 如果检测到矩形，直接进入追踪状态
+                            q3_state = Q3_STATE_TRACKING;
+                            homing_phase = HOMING_PHASE_Y;  // 重置回零阶段
+                            homing_start_time = 0;
+                            q3_last_time = current_time;  // 更新任务计时器
+                        } else {
+                            // 未检测到矩形，执行X轴回零
+                            Emm_V5_Origin_Trigger_Return(STEP_MOTOR_X, 0, false);
+                            HAL_Delay(100);                 // 确保命令发送
+                            homing_start_time = 0;          // 重置计时器
+                            homing_phase = HOMING_PHASE_X;  // 进入X轴回零阶段
+                        }
+                    }
+                    break;
+
+                case HOMING_PHASE_X:
+                    // 等待X轴回零完成(200ms)
+                    if (current_time - homing_start_time > 200) {
+                        homing_start_time = 0;             // 重置计时器
+                        homing_phase = HOMING_PHASE_DONE;  // 进入回零完成阶段
+                    }
+                    break;
+
+                case HOMING_PHASE_DONE:
+                    // 回零完成，准备进入搜索状态
+                    homing_start_time = 0;
+                    q3_last_time = current_time;    // 重置搜索计时器
+                    homing_phase = HOMING_PHASE_Y;  // 重置回零阶段
+                    q3_state = Q3_STATE_SEARCHING;  // 进入搜索状态
+                    break;
             }
             break;
         }
@@ -233,23 +302,29 @@ void Task_BasicQ3_Execute(void)
                 if (current_search_position >= X_SEARCH_MAX_PULSES) {
                     // 超出范围，搜索失败
                     Task_BasicQ3_Stop();
-                    printf("Q3 search failed: reached max range\r\n");
                     return;
                 }
-                
+
                 // 增加搜索位置
                 current_search_position += X_SEARCH_STEP;
-                
+
                 // 使用位置模式控制，向指定方向移动一步
-                Emm_V5_Pos_Control(STEP_MOTOR_X, X_SEARCH_DIR, X_SEARCH_VELOCITY,
-                                 X_SEARCH_ACC, current_search_position, false, false);
-                
+                Emm_V5_Pos_Control(STEP_MOTOR_X, X_SEARCH_DIR, X_SEARCH_VELOCITY, X_SEARCH_ACC,
+                                   current_search_position, false, false);
+
                 // 标记搜索已启动，等待一段时间后检查结果
                 search_started = true;
-                q3_last_time = current_time; // 更新计时
+
+                // 如果是第一次搜索动作，记录开始时间
+                if (current_search_position == X_SEARCH_STEP) {
+                    q3_last_time = current_time;  // 设置搜索起始时间
+                }
+
+                // 确保电机命令执行后有短暂等待，以便视觉系统可以稳定
+                HAL_Delay(20);
             } else {
                 // 等待电机到位或一定时间后，重置搜索标志，进行下一步搜索
-                if (current_time - q3_last_time > 100) {
+                if (current_time - q3_last_time > 200) {
                     search_started = false;
                 }
             }
@@ -260,18 +335,18 @@ void Task_BasicQ3_Execute(void)
                 // 找到目标，进行追踪
                 TrackRectangle();
             } else {
-                // 丢失目标，恢复到搜索状态
+                // 丢失目标，立即停止电机
+                Emm_V5_Stop_Now(STEP_MOTOR_X, false);
+                HAL_Delay(20);
+                Emm_V5_Stop_Now(STEP_MOTOR_Y, false);
+
+                // 恢复到搜索状态
                 q3_state = Q3_STATE_SEARCHING;
                 search_started = false;  // 重置搜索启动标志
-                
+
                 // 继续从当前位置搜索，不重置位置计数器
-                // 只给予有限的额外搜索时间，确保4秒内能完成
-                uint32_t elapsed = current_time - q3_last_time;
-                if (elapsed < search_timeout_ms) {
-                    q3_last_time = current_time - (search_timeout_ms - 1000);
-                } else {
-                    q3_last_time = current_time;
-                }
+                // 更新搜索计时器，给予足够的剩余搜索时间
+                q3_last_time = current_time;
             }
             break;
 
@@ -279,6 +354,7 @@ void Task_BasicQ3_Execute(void)
             // 任务完成
             HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
             g_task_basic_q3_running = false;  // 停止任务
+            q3_total_start_time = 0;          // 重置总时间计时器
             break;
     }
 }
