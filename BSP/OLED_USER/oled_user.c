@@ -2,18 +2,19 @@
 
 #include "control.h"
 #include "laser_shot_common.h"
-#include "servo_user.h"
+#include "Emm_V5.h"
 
 OLED_Disp_t g_oled_mode = DISP_CENTER_POINT;
 uint8_t current_task = 1;
+uint8_t current_set_zero_addr = STEP_MOTOR_X;
 
 void OLED_ChangeMode(void)
 {
     switch (g_oled_mode) {
         case DISP_CENTER_POINT:
-            g_oled_mode = CH_Y_10;
+            g_oled_mode = SET_ZERO_POINT;
             break;
-        case CH_Y_10:
+        case SET_ZERO_POINT:
             g_oled_mode = TEST_MODE;
             break;
         case TEST_MODE:
@@ -38,8 +39,8 @@ void OLED_Display(void)
         case DISP_CENTER_POINT:
             OLED_ShowString(0, 0, "Center Point", 16);
             break;
-        case CH_Y_10:
-            OLED_ShowString(0, 0, "CH_Y Mode", 16);
+        case SET_ZERO_POINT:
+            OLED_ShowString(0, 0, "SET_ZERO", 16);
             break;
         case TEST_MODE:
             OLED_ShowString(0, 0, "K0:Choose K1:Run", 8);
@@ -58,13 +59,12 @@ void OLED_Display(void)
         OLED_ShowString(0, 4, "Center Y:", 16);
         OLED_ShowNum(8 * 12, 2, g_curr_center_point.x, 4, 16);
         OLED_ShowNum(8 * 12, 4, g_curr_center_point.y, 4, 16);
-    } else {
-        OLED_ShowString(0, 2, "CH_X Duty:", 16);
-        OLED_ShowString(0, 4, "CH_Y Duty:", 16);
-        OLED_ShowNum(8 * 12, 2, g_servox_duty, 4, 16);
-        OLED_ShowNum(8 * 12, 4, g_servoy_duty, 4, 16);
-        OLED_ShowString(0, 7, "Laser:", 8);
-        OLED_ShowNum(6 * 12, 7, g_laser_point.x, 3, 8);
-        OLED_ShowNum(9 * 12, 7, g_laser_point.y, 3, 8);
+    } else if (g_oled_mode == SET_ZERO_POINT) {
+        OLED_ShowString(0, 2, "Mode:", 16);
+        if (current_set_zero_addr == STEP_MOTOR_X) {
+            OLED_ShowString(6 * 12, 2, "X", 16);
+        } else {
+            OLED_ShowString(6 * 12, 2, "Y", 16);
+        }
     }
 }

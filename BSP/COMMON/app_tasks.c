@@ -44,14 +44,7 @@ static void Task_ServoCtrl(void)
 }
 #endif
 
-#if 0
-static void Task_KeyProcess(void)
-{
-
-}
-#endif
-
-#if 0
+#if 1
 /**
  * @brief OLED显示任务
  *
@@ -59,17 +52,6 @@ static void Task_KeyProcess(void)
 static void Task_OLEDDisplay(void)
 {
     OLED_Display();
-}
-#endif
-
-#if 0
-/**
- * @brief UART数据处理任务
- */
-static void Task_UartProcess(void)
-{
-    /* 调用原有的UART数据处理函数 */
-    Uart_DataProcess();
 }
 #endif
 
@@ -124,7 +106,7 @@ void AppTasks_Init(void)
     // TaskScheduler_AddTask(Task_UartProcess, 10, TASK_PRIORITY_HIGH, "UART_Task");
     TaskScheduler_AddTask(Key_Proc, 20, TASK_PRIORITY_NORMAL, "Key_Task");
     // TaskScheduler_AddTask(Task_ServoCtrl, 20, TASK_PRIORITY_NORMAL, "Servo_Task");
-    // TaskScheduler_AddTask(Task_OLEDDisplay, 50, TASK_PRIORITY_NORMAL, "OLED_Task");
+    TaskScheduler_AddTask(Task_OLEDDisplay, 50, TASK_PRIORITY_NORMAL, "OLED_Task");
     TaskScheduler_AddTask(Task_TrackControl, 50, TASK_PRIORITY_HIGH, "Track_Task");
     // TaskScheduler_AddTask(Task_SystemMonitor, 1000, TASK_PRIORITY_NORMAL, "Monitor_Task");
     /* 输出任务信息 */

@@ -63,6 +63,8 @@ void Error_Handler(void);
 #define KEY_0_GPIO_Port GPIOE
 #define USER_KEY_Pin GPIO_PIN_0
 #define USER_KEY_GPIO_Port GPIOA
+#define BOARD_LED_Pin GPIO_PIN_1
+#define BOARD_LED_GPIO_Port GPIOA
 #define OLED_RES_Pin GPIO_PIN_0
 #define OLED_RES_GPIO_Port GPIOB
 #define OLED_DC_Pin GPIO_PIN_1

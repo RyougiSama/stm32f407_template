@@ -2,6 +2,7 @@
 #include "task_scheduler.h"
 #include "oled_user.h"
 #include "laser_shot_common.h"
+#include "Emm_V5.h"
 
 /* 按键消抖实例 */
 static KeyDebounce_t key_debounce;
@@ -181,6 +182,26 @@ void Key_Proc(void)
     KeyValue_t key_val = Key_GetDebounced();
     /* 只有在按键值变化且不为KEY_NONE时才处理 */
     if (key_val != KEY_NONE && key_val != key_val_old) {
+        if (key_val == KEY_S4) {
+            OLED_ChangeMode();
+        } else {
+            if (g_oled_mode == DISP_CENTER_POINT) {
+
+            } else if (g_oled_mode == SET_ZERO_POINT) {
+                if (key_val == KEY_S1) {
+                    current_set_zero_addr = (current_set_zero_addr == STEP_MOTOR_X) ? STEP_MOTOR_Y : STEP_MOTOR_X;
+                } else if (key_val == KEY_S2) {
+                    // 执行设置零点操作
+                    Emm_V5_Origin_Set_O(current_set_zero_addr, true);
+                    
+                }
+            } else if (g_oled_mode == TEST_MODE) {
+
+            }
+        }
+
+
+
         switch (key_val)
         {
         case KEY_0:
@@ -190,6 +211,15 @@ void Key_Proc(void)
                 Task_BasicQ2_WithZDT_Start();
                 g_task_basic_q2_with_zdt_start_time = TaskScheduler_GetSystemTick();
             }
+            break;
+        case KEY_S1:
+            break;
+        case KEY_S2:
+            break;
+        case KEY_S3:
+            break;
+        case KEY_S4:
+            OLED_ChangeMode();
             break;
         default:
             break;
