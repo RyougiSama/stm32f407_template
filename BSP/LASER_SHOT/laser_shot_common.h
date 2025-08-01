@@ -30,4 +30,10 @@ void Task_BasicQ2_WithZDT_Execute(void);
 void Task_BasicQ2_WithZDT_Stop(void);
 bool Task_BasicQ2_WithZDT_IsRunning(void);
 
+// Q3任务函数声明
+void Task_BasicQ3_Start(void);
+void Task_BasicQ3_Execute(void);
+void Task_BasicQ3_Stop(void);
+bool Task_BasicQ3_IsRunning(void);
+
 #endif

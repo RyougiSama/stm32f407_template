@@ -1,8 +1,9 @@
 #include "key.h"
-#include "task_scheduler.h"
-#include "oled_user.h"
-#include "laser_shot_common.h"
+
 #include "Emm_V5.h"
+#include "laser_shot_common.h"
+#include "oled_user.h"
+#include "task_scheduler.h"
 
 /* 按键消抖实例 */
 static KeyDebounce_t key_debounce;
@@ -36,7 +37,7 @@ static KeyValue_t Key_GetNum(void)
 
 /**
  * @brief 获取经过消抖处理的按键值
- * 
+ *
  * @return KeyValue_t 消抖后的按键值，KEY_NONE表示无按键，其他值表示有按键按下
  */
 KeyValue_t Key_GetDebounced(void)
@@ -93,7 +94,7 @@ KeyValue_t Key_GetDebounced(void)
             }
             break;
     }
-    return KEY_NONE;  /* 无稳定按键 */
+    return KEY_NONE; /* 无稳定按键 */
 }
 
 #if 0
@@ -182,26 +183,41 @@ void Key_Proc(void)
     KeyValue_t key_val = Key_GetDebounced();
     /* 只有在按键值变化且不为KEY_NONE时才处理 */
     if (key_val != KEY_NONE && key_val != key_val_old) {
-        if (key_val == KEY_S4) {
+        if (key_val == KEY_S4 || key_val == USER_KEY) {
             OLED_ChangeMode();
         } else {
             if (g_oled_mode == DISP_CENTER_POINT) {
-
             } else if (g_oled_mode == SET_ZERO_POINT) {
                 if (key_val == KEY_S1) {
-                    current_set_zero_addr = (current_set_zero_addr == STEP_MOTOR_X) ? STEP_MOTOR_Y : STEP_MOTOR_X;
+                    current_set_zero_addr =
+                        (current_set_zero_addr == STEP_MOTOR_X) ? STEP_MOTOR_Y : STEP_MOTOR_X;
                 } else if (key_val == KEY_S2) {
                     // 执行设置零点操作
                     Emm_V5_Origin_Set_O(current_set_zero_addr, true);
-                    
+                } else if (key_val == KEY_S3) {
+                    Emm_V5_Origin_Trigger_Return(current_set_zero_addr, 0, false);
+                    HAL_Delay(20);
                 }
             } else if (g_oled_mode == TEST_MODE) {
-
+                if (key_val == KEY_S1) {
+                    if (Task_BasicQ2_WithZDT_IsRunning()) {
+                        Task_BasicQ2_WithZDT_Stop();
+                    } else {
+                        Task_BasicQ2_WithZDT_Start();
+                        g_task_basic_q2_with_zdt_start_time = TaskScheduler_GetSystemTick();
+                    }
+                } else if (key_val == KEY_S2) {
+                    // Q3任务控制：主动搜索矩形并追踪
+                    if (Task_BasicQ3_IsRunning()) {
+                        Task_BasicQ3_Stop();
+                    } else {
+                        Task_BasicQ3_Start();
+                    }
+                }
             }
         }
 
-
-
+#if 0
         switch (key_val)
         {
         case KEY_0:
@@ -210,6 +226,14 @@ void Key_Proc(void)
             } else {
                 Task_BasicQ2_WithZDT_Start();
                 g_task_basic_q2_with_zdt_start_time = TaskScheduler_GetSystemTick();
+            }
+            break;
+        case KEY_1:
+            // Q3任务控制：主动搜索矩形并追踪
+            if (Task_BasicQ3_IsRunning()) {
+                Task_BasicQ3_Stop();
+            } else {
+                Task_BasicQ3_Start();
             }
             break;
         case KEY_S1:
@@ -224,6 +248,7 @@ void Key_Proc(void)
         default:
             break;
         }
+#endif
     }
     /* 当按键释放时清除旧key_val_old */
     if (key_val == KEY_NONE) {
