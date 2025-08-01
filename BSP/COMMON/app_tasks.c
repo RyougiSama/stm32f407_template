@@ -78,8 +78,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 static void Task_TrackControl(void)
 {
     // 执行Q2或Q3任务
-    Task_BasicQ2_WithZDT_Execute();
-    Task_BasicQ3_Execute();
+    if (g_task_basic_q2_with_zdt_running) {
+        Task_BasicQ2_WithZDT_Execute();
+    } else if (g_task_basic_q3_running) {
+        Task_BasicQ3_Execute();
+    }
 }
 #endif
 

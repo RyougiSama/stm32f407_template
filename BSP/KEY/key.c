@@ -187,6 +187,7 @@ void Key_Proc(void)
             OLED_ChangeMode();
         } else {
             if (g_oled_mode == DISP_CENTER_POINT) {
+
             } else if (g_oled_mode == SET_ZERO_POINT) {
                 if (key_val == KEY_S1) {
                     current_set_zero_addr =

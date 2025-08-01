@@ -15,6 +15,9 @@ extern uint16_t g_sensor_aim_x;
 extern uint16_t g_sensor_aim_y;
 extern uint32_t g_task_basic_q2_with_zdt_start_time;
 
+extern bool g_task_basic_q2_with_zdt_running;
+extern bool g_task_basic_q3_running;
+
 typedef struct {
     uint16_t x;  // X坐标
     uint16_t y;  // Y坐标
