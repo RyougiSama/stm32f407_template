@@ -82,6 +82,9 @@ static void Task_TrackControl(void)
         Task_BasicQ2_WithZDT_Execute();
     } else if (g_task_basic_q3_running) {
         Task_BasicQ3_Execute();
+    } else if (Laser_TrackAimPoint_IsRunning()) {
+        // 执行激光追踪任务
+        Laser_TrackAimPoint();
     }
 }
 #endif

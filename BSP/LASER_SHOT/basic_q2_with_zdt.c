@@ -52,7 +52,7 @@ static void BasicQ2_Using_Positon(void)
 
     // 如果误差在死区内，不做调整
     if (abs(error_x) < DEADZONE && abs(error_y) < DEADZONE
-        /* || (abs(curr_time - g_task_basic_q2_with_zdt_start_time) > 1900*/) {
+         || (abs(curr_time - g_task_basic_q2_with_zdt_start_time) > 1990)) {
         HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
         g_task_basic_q2_with_zdt_running = false;  // 停止任务
         return;

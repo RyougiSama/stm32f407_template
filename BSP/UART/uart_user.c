@@ -11,13 +11,13 @@
 uint8_t g_uart_command_buffer[UART_USER_BUFFER_SIZE];  // UART command buffer
 
 // 中值滤波相关变量
-
-// 中值滤波相关变量
 #define FILTER_BUFFER_SIZE 3                           // 滤波缓冲区大小
 static PixelPoint_t point_buffer[FILTER_BUFFER_SIZE];  // 坐标缓冲区
 static uint8_t buffer_index = 0;                       // 当前缓冲区索引
 static uint8_t buffer_filled = 0;                      // 缓冲区是否已填满
 
+// 滤波控制变量
+static bool filter_enabled = true;  // 滤波使能标志
 
 /**
  * @brief 获取中值（冒泡排序）
@@ -98,13 +98,35 @@ void Uart_DataProcess(void)
         raw_point.x = (g_uart_command_buffer[2] << 8) | g_uart_command_buffer[3];
         raw_point.y = (g_uart_command_buffer[4] << 8) | g_uart_command_buffer[5];
 
-        // 应用中值滤波
-        PixelPoint_t filtered_point = FilterCenterPoint(raw_point);
+        // 根据滤波使能标志决定是否应用中值滤波
+        if (filter_enabled) {
+            // 应用中值滤波
+            PixelPoint_t filtered_point = FilterCenterPoint(raw_point);
+            g_curr_center_point = filtered_point;
+        } else {
+            // 直接使用原始数据，不进行滤波
+            g_curr_center_point = raw_point;
+        }
+    }
+}
 
-        // 更新全局坐标变量
-        g_curr_center_point = filtered_point;
-        // g_curr_center_point.x = (g_uart_command_buffer[2] << 8) | g_uart_command_buffer[3];
-        // g_curr_center_point.y = (g_uart_command_buffer[4] << 8) | g_uart_command_buffer[5];
+/**
+ * @brief 启用或禁用中值滤波
+ * @param enable true启用滤波，false禁用滤波
+ */
+void Uart_SetFilterEnabled(bool enable)
+{
+    filter_enabled = enable;
+
+    // 如果重新启用滤波，清空滤波缓冲区以避免使用旧数据
+    if (enable) {
+        buffer_index = 0;
+        buffer_filled = 0;
+        // 清空缓冲区
+        for (uint8_t i = 0; i < FILTER_BUFFER_SIZE; i++) {
+            point_buffer[i].x = 0;
+            point_buffer[i].y = 0;
+        }
     }
 }
 

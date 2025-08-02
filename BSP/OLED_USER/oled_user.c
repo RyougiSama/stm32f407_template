@@ -58,6 +58,14 @@ void OLED_Display(void)
         OLED_ShowString(0, 4, "Center Y:", 16);
         OLED_ShowNum(8 * 12, 2, g_curr_center_point.x, 4, 16);
         OLED_ShowNum(8 * 12, 4, g_curr_center_point.y, 4, 16);
+        
+        // 显示激光追踪状态
+        OLED_ShowString(0, 6, "Laser Track:", 8);
+        if (Laser_TrackAimPoint_IsRunning()) {
+            OLED_ShowString(8 * 12, 6, "ON", 8);
+        } else {
+            OLED_ShowString(8 * 12, 6, "OFF", 8);
+        }
     } else if (g_oled_mode == SET_ZERO_POINT) {
         OLED_ShowString(0, 2, "Mode:", 16);
         if (current_set_zero_addr == STEP_MOTOR_X) {
