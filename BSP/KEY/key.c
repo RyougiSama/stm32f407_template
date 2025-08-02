@@ -187,9 +187,8 @@ void Key_Proc(void)
             g_task_basic_q2_with_zdt_running = !g_task_basic_q2_with_zdt_running;  // 切换任务状态
             g_task_basic_q2_with_zdt_start_time = HAL_GetTick();
         } else if (key_val == KEY_S2) {
-            Emm_V5_Origin_Set_O(STEP_MOTOR_Y, true);
             // Emm_V5_Origin_Trigger_Return(STEP_MOTOR_Y, 1, false);
-            // HAL_GPIO_TogglePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin);
+            HAL_GPIO_TogglePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin);
             HAL_Delay(20);
             // OLED_ShowString(0, 0, "OK", 16);
         } else if (key_val == KEY_S3) {
@@ -201,7 +200,7 @@ void Key_Proc(void)
                 Laser_TrackAimPoint_Start();
             }
         } else if (key_val == USER_KEY) {
-            HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
+            // HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
         }
 
 #if 0

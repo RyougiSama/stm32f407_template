@@ -13,19 +13,19 @@
 #define PID_KD_VALUE        0.15f   // 微分系数：改善动态性能，减少超调
 
 // PID输出限制 - 控制最大步进数，影响追踪速度
-#define PID_OUTPUT_MAX      80.0f   // 最大输出步进数（增大可提高追踪速度）
-#define PID_OUTPUT_MIN      -80.0f  // 最小输出步进数
+#define PID_OUTPUT_MAX      50.0f   // 最大输出步进数（增大可提高追踪速度）
+#define PID_OUTPUT_MIN      -50.0f  // 最小输出步进数
 #define PID_INTEGRAL_MAX    25.0f   // 积分限幅上限（防止积分饱和）
 #define PID_INTEGRAL_MIN    -25.0f  // 积分限幅下限
 
 // 电机控制参数 - 影响实际执行速度
-#define PID_MOTOR_VELOCITY  40      // PID模式电机速度（增大可提高追踪速度）
-#define PID_MOTOR_ACCELERATION 20   // PID模式电机加速度（影响启动响应）
+#define PID_MOTOR_VELOCITY  30      // PID模式电机速度（增大可提高追踪速度）
+#define PID_MOTOR_ACCELERATION 15   // PID模式电机加速度（影响启动响应）
 
 // 死区和步进限制 - 影响追踪精度和最小动作
-#define PID_DEADZONE        2       // 死区大小（像素）：减小提高精度
+#define PID_DEADZONE        3       // 死区大小（像素）：减小提高精度
 #define PID_MIN_STEP        1       // 最小步进数：减小提高精度
-#define PID_MAX_STEP        30      // 最大步进数：增大提高大误差时的追踪速度
+#define PID_MAX_STEP        20      // 最大步进数：增大提高大误差时的追踪速度
 
 // 控制延时 - 影响系统响应速度
 #define PID_MOTOR_DELAY_MS  10      // 电机命令间延时（ms）：减小可提高响应速度
@@ -128,8 +128,8 @@ bool Laser_TrackAimPoint_IsRunning(void)
  */
 static bool Laser_Track_StepControl(void)
 {
-    const uint16_t vel = 10;      // 电机速度
-    const uint8_t acc = 5;        // 电机加速度
+    const uint16_t vel = 20;      // 电机速度
+    const uint8_t acc = 10;        // 电机加速度
     const uint16_t DEADZONE = 3;  // 死区范围
 
     // 计算误差

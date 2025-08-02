@@ -23,8 +23,8 @@ typedef enum {
 
 // ============== Q3任务配置参数 ==============
 // 任务时间控制
-#define Q3_TOTAL_TIMEOUT_MS 40000        // 总任务超时时间(ms)
-#define Q3_SEARCH_TIMEOUT_MS 25000       // 搜索阶段超时时间(ms)，留1.5秒追踪
+#define Q3_TOTAL_TIMEOUT_MS 400000        // 总任务超时时间(ms)
+#define Q3_SEARCH_TIMEOUT_MS 250000       // 搜索阶段超时时间(ms)，留1.5秒追踪
 #define Q3_INIT_DETECTION_TIME_MS 200   // 初始化检测时间(ms)
 #define Q3_DETECTION_VALID_TIME_MS 200  // 检测有效时间(ms)
 

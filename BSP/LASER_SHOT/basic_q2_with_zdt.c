@@ -13,7 +13,7 @@ uint16_t g_sensor_aim_x = 155;
 uint16_t g_sensor_aim_y = 140  ;
 
 // 步进控制相关参数
-#define CLK_STEP_SMALL  3            // 小步进值，微调用
+#define CLK_STEP_SMALL  2            // 小步进值，微调用
 #define CLK_STEP_MEDIUM 5           // 中等步进值
 #define CLK_STEP_LARGE  10           // 大步进值，快速调整用
 
@@ -45,7 +45,7 @@ static void BasicQ2_Using_Positon(void)
     const uint16_t vel = 10;
     const uint8_t acc = 5;
     // 定义死区范围，当误差小于这个值时不再调整，防止抖动
-    const uint16_t DEADZONE = 3;
+    const uint16_t DEADZONE = 2;
     // 计算误差
     int16_t error_x = g_curr_center_point.x - g_sensor_aim_x;
     int16_t error_y = g_curr_center_point.y - g_sensor_aim_y;
