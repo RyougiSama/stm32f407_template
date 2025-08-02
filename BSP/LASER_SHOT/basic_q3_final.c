@@ -4,8 +4,8 @@
 #include "pid_controller.h"
 #include "task_scheduler.h"
 
-uint16_t g_sensor_aim_x = 160;
-uint16_t g_sensor_aim_y = 140;
+uint16_t g_sensor_aim_x = 150;
+uint16_t g_sensor_aim_y = 130;
 
 // ==================== Q3键盘任务PID参数配置区域 ====================
 // 以下参数影响Q3键盘任务的PID追踪响应速度和精度，可根据实际效果调整
@@ -22,7 +22,7 @@ uint16_t g_sensor_aim_y = 140;
 #define Q3_KEY_PID_INTEGRAL_MIN -20.0f  // 积分限幅下限
 
 // 电机控制参数 - 影响实际执行速度（更激进以满足4秒要求）
-#define Q3_KEY_MOTOR_VELOCITY 30      // 电机速度（比默认快）
+#define Q3_KEY_MOTOR_VELOCITY 28      // 电机速度（比默认快）
 #define Q3_KEY_MOTOR_ACCELERATION 18  // 电机加速度
 
 // 死区和步进限制 - 影响追踪精度和最小动作
@@ -37,7 +37,7 @@ uint16_t g_sensor_aim_y = 140;
 #define Q3_KEY_TIMEOUT_MS 4000  // 总超时时间4秒
 
 // 初始转角配置（45度为基准）
-#define Q3_KEY_TURN_VEL 50      // 初始转动电机速度
+#define Q3_KEY_TURN_VEL 40      // 初始转动电机速度
 #define Q3_KEY_TURN_ACC 20      // 初始转动电机加速度
 #define Q3_KEY_TURN_45_CLK 400  // 45度转动所需的时钟脉冲数
 // =================================================================
