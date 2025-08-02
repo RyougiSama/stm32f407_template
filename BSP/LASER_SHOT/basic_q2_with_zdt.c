@@ -9,12 +9,12 @@ PixelPoint_t g_curr_center_point;
 uint16_t g_sensor_width = 320;
 uint16_t g_sensor_height = 240;
 
-uint16_t g_sensor_aim_x = 160;
-uint16_t g_sensor_aim_y = 140;
+static uint16_t q2_sensor_aim_x = 150;
+static uint16_t q2_sensor_aim_y = 130;
 
 // 步进控制相关参数
 #define CLK_STEP_SMALL  2            // 小步进值，微调用
-#define CLK_STEP_MEDIUM 5           // 中等步进值
+#define CLK_STEP_MEDIUM 5            // 中等步进值
 #define CLK_STEP_LARGE  10           // 大步进值，快速调整用
 
 void Task_BasicQ2_WithZDT_Start(void)
@@ -47,8 +47,8 @@ static void BasicQ2_Using_Positon(void)
     // 定义死区范围，当误差小于这个值时不再调整，防止抖动
     const uint16_t DEADZONE = 2;
     // 计算误差
-    int16_t error_x = g_curr_center_point.x - g_sensor_aim_x;
-    int16_t error_y = g_curr_center_point.y - g_sensor_aim_y;
+    int16_t error_x = g_curr_center_point.x - q2_sensor_aim_x;
+    int16_t error_y = g_curr_center_point.y - q2_sensor_aim_y;
 
     // 如果误差在死区内，不做调整
     if (abs(error_x) < DEADZONE && abs(error_y) < DEADZONE

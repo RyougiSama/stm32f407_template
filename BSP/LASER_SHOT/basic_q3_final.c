@@ -4,6 +4,9 @@
 #include "pid_controller.h"
 #include "task_scheduler.h"
 
+uint16_t g_sensor_aim_x = 160;
+uint16_t g_sensor_aim_y = 140;
+
 // ==================== Q3键盘任务PID参数配置区域 ====================
 // 以下参数影响Q3键盘任务的PID追踪响应速度和精度，可根据实际效果调整
 
