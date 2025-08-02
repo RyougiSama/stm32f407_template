@@ -9,7 +9,7 @@ PixelPoint_t g_curr_center_point;
 uint16_t g_sensor_width = 320;
 uint16_t g_sensor_height = 240;
 
-uint16_t g_sensor_aim_x = 180;
+uint16_t g_sensor_aim_x = 160;
 uint16_t g_sensor_aim_y = 140;
 
 // 步进控制相关参数

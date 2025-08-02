@@ -248,13 +248,12 @@ void Key_Proc(void)
             // Emm_V5_Origin_Set_O(STEP_MOTOR_X, true);
             // Emm_V5_Origin_Trigger_Return(STEP_MOTOR_Y, 1, false);
         } else if (key_val == KEY_S3) {
-            Emm_V5_Origin_Trigger_Return(STEP_MOTOR_X, 0, false);
         } else if (key_val == KEY_S4) {
-            if (Laser_TrackAimPoint_IsRunning()) {
-                Laser_TrackAimPoint_Stop();
-            } else {
-                Laser_TrackAimPoint_Start();
-            }
+            // if (Laser_TrackAimPoint_IsRunning()) {
+            //     Laser_TrackAimPoint_Stop();
+            // } else {
+            //     Laser_TrackAimPoint_Start();
+            // }
         } else if (key_val == KEY_S5) {
             // S5任务：90度左转
             Task_Q3_Key_S5_Start();
@@ -267,6 +266,26 @@ void Key_Proc(void)
         } else if (key_val == KEY_S8) {
             // S8任务：135度左转
             Task_Q3_Key_S8_Start();
+        } else if (key_val == KEY_S9) {
+            // 处理KEY_S9按键逻辑
+        } else if (key_val == KEY_S10) {
+            // 处理KEY_S10按键逻辑
+        } else if (key_val == KEY_S11) {
+            // 处理KEY_S11按键逻辑
+        } else if (key_val == KEY_S12) {
+            // 处理KEY_S12按键逻辑
+        } else if (key_val == KEY_S13) {
+            // 处理KEY_S13按键逻辑
+            Emm_V5_Origin_Set_O(STEP_MOTOR_X, true);
+        } else if (key_val == KEY_S14) {
+            // 处理KEY_S14按键逻辑
+            Emm_V5_Origin_Trigger_Return(STEP_MOTOR_X, 0, false);
+        } else if (key_val == KEY_S15) {
+            // 处理KEY_S15按键逻辑
+            Emm_V5_Origin_Set_O(STEP_MOTOR_Y, true);
+        } else if (key_val == KEY_S16) {
+            // 处理KEY_S16按键逻辑
+            Emm_V5_Origin_Trigger_Return(STEP_MOTOR_Y, 0, false);
         }
     }
     /* 当按键释放时清除旧key_val_old */

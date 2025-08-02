@@ -8,19 +8,19 @@
 // 以下参数影响Q3键盘任务的PID追踪响应速度和精度，可根据实际效果调整
 
 // PID控制器参数 - 影响追踪响应速度和稳定性
-#define Q3_KEY_PID_KP_VALUE 2.0f   // X轴PID比例系数（针对4秒限制优化）
+#define Q3_KEY_PID_KP_VALUE 1.8f   // X轴PID比例系数（针对4秒限制优化）
 #define Q3_KEY_PID_KI_VALUE 0.05f  // X轴PID积分系数
 #define Q3_KEY_PID_KD_VALUE 0.1f   // X轴PID微分系数
 
 // PID输出限制 - 控制最大步进数，影响追踪速度
-#define Q3_KEY_PID_OUTPUT_MAX 40.0f     // 最大输出步进数
-#define Q3_KEY_PID_OUTPUT_MIN -40.0f    // 最小输出步进数
+#define Q3_KEY_PID_OUTPUT_MAX 30.0f     // 最大输出步进数
+#define Q3_KEY_PID_OUTPUT_MIN -30.0f    // 最小输出步进数
 #define Q3_KEY_PID_INTEGRAL_MAX 20.0f   // 积分限幅上限
 #define Q3_KEY_PID_INTEGRAL_MIN -20.0f  // 积分限幅下限
 
 // 电机控制参数 - 影响实际执行速度（更激进以满足4秒要求）
-#define Q3_KEY_MOTOR_VELOCITY 35      // 电机速度（比默认快）
-#define Q3_KEY_MOTOR_ACCELERATION 20  // 电机加速度
+#define Q3_KEY_MOTOR_VELOCITY 30      // 电机速度（比默认快）
+#define Q3_KEY_MOTOR_ACCELERATION 18  // 电机加速度
 
 // 死区和步进限制 - 影响追踪精度和最小动作
 #define Q3_KEY_DEADZONE 2   // 死区大小（像素，更小以提高精度）
@@ -28,7 +28,7 @@
 #define Q3_KEY_MAX_STEP 25  // 最大步进数（增大以提高大误差时的追踪速度）
 
 // 控制延时 - 影响系统响应速度
-#define Q3_KEY_MOTOR_DELAY_MS 8  // 电机命令延时（ms，减小以提高响应速度）
+#define Q3_KEY_MOTOR_DELAY_MS 20  // 电机命令延时（ms，减小以提高响应速度）
 
 // 任务超时控制
 #define Q3_KEY_TIMEOUT_MS 4000  // 总超时时间4秒
