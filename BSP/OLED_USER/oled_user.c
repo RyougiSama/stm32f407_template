@@ -66,6 +66,9 @@ void OLED_Display(void)
         } else {
             OLED_ShowString(8 * 12, 6, "OFF", 8);
         }
+        
+        // 显示控制模式 (如果需要可以通过全局变量获取当前模式)
+        OLED_ShowString(0, 7, "Mode:STEP/PID", 8);
     } else if (g_oled_mode == SET_ZERO_POINT) {
         OLED_ShowString(0, 2, "Mode:", 16);
         if (current_set_zero_addr == STEP_MOTOR_X) {

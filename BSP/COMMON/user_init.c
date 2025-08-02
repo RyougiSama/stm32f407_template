@@ -23,12 +23,13 @@ void User_Init(void)
     // 初始化应用任务
     AppTasks_Init();
     // 初始化OLED显示
-    OLED_Init();
-    OLED_Clear();
+    // OLED_Init();
+    // OLED_Clear();
+    HAL_Delay(500);
     // 初始化GPIO输出
     HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_RESET);
     HAL_Delay(100);
     Emm_V5_En_Control(0, true, false);
-    HAL_Delay(100);
+    HAL_Delay(200);
     Emm_V5_Origin_Trigger_Return(STEP_MOTOR_Y, 0, false);
 }

@@ -61,14 +61,9 @@ static void Task_OLEDDisplay(void)
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    static uint8_t key_task_cnt = 0;
     if (htim->Instance == TIM6) {
         // 每10ms执行一次
         Uart_DataProcess();
-        // if (++key_task_cnt >= 2) {
-        //     Key_Proc();
-        //     key_task_cnt = 0;
-        // }
     }
 }
 
@@ -119,7 +114,7 @@ void AppTasks_Init(void)
     // TaskScheduler_AddTask(Task_UartProcess, 10, TASK_PRIORITY_HIGH, "UART_Task");
     TaskScheduler_AddTask(Key_Proc, 20, TASK_PRIORITY_NORMAL, "Key_Task");
     // TaskScheduler_AddTask(Task_ServoCtrl, 20, TASK_PRIORITY_NORMAL, "Servo_Task");
-    // TaskScheduler_AddTask(Task_OLEDDisplay, 50, TASK_PRIORITY_NORMAL, "OLED_Task");
+    // TaskScheduler_AddTask(Task_OLEDDisplay, 100, TASK_PRIORITY_LOW, "OLED_Task");
     TaskScheduler_AddTask(Task_TrackControl, 50, TASK_PRIORITY_HIGH, "Track_Task");
     // TaskScheduler_AddTask(Task_SystemMonitor, 1000, TASK_PRIORITY_NORMAL, "Monitor_Task");
     /* 输出任务信息 */

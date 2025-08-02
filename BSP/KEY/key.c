@@ -188,8 +188,8 @@ void Key_Proc(void)
             g_task_basic_q2_with_zdt_start_time = HAL_GetTick();
         } else if (key_val == KEY_S2) {
             // Emm_V5_Origin_Set_O(STEP_MOTOR_Y, true);
-            // Emm_V5_Origin_Trigger_Return(STEP_MOTOR_X, 1, false);
-            HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
+            Emm_V5_Origin_Trigger_Return(STEP_MOTOR_X, 1, false);
+            // HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
             HAL_Delay(20);
             // OLED_ShowString(0, 0, "OK", 16);
         } else if (key_val == KEY_S3) {
@@ -200,6 +200,8 @@ void Key_Proc(void)
             } else {
                 Laser_TrackAimPoint_Start();
             }
+        } else if (key_val == USER_KEY) {
+            HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
         }
 
 #if 0
@@ -266,6 +268,13 @@ void Key_Proc(void)
             }
             break;
         case KEY_S2:
+            // 激光追踪模式切换：步进控制 <-> PID控制
+            {
+                static TrackMode_t current_mode = TRACK_MODE_STEP;
+                current_mode = (current_mode == TRACK_MODE_STEP) ? TRACK_MODE_PID : TRACK_MODE_STEP;
+                Laser_TrackAimPoint_SetMode(current_mode);
+                // 可以在这里添加模式切换提示
+            }
             break;
         case KEY_S3:
             break;

@@ -9,6 +9,12 @@
 #define ERROR_THRESHOLD_SMALL 10   // 小误差阈值
 #define ERROR_THRESHOLD_MEDIUM 50  // 中等误差阈值
 
+// 激光追踪控制模式
+typedef enum {
+    TRACK_MODE_STEP = 0,    // 步进控制模式（原始方式）
+    TRACK_MODE_PID          // PID控制模式
+} TrackMode_t;
+
 extern uint16_t g_sensor_width;
 extern uint16_t g_sensor_height;
 extern uint16_t g_sensor_aim_x;
@@ -42,6 +48,7 @@ bool Task_BasicQ3_IsRunning(void);
 void Laser_TrackAimPoint_Start(void);
 void Laser_TrackAimPoint_Stop(void);
 bool Laser_TrackAimPoint_IsRunning(void);
+void Laser_TrackAimPoint_SetMode(TrackMode_t mode);
 void Laser_TrackAimPoint(void);
 
 #endif
