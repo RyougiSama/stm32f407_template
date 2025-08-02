@@ -32,4 +32,5 @@ void User_Init(void)
     Emm_V5_En_Control(0, true, false);
     HAL_Delay(200);
     Emm_V5_Origin_Trigger_Return(STEP_MOTOR_Y, 0, false);
+    HAL_Delay(500);
 }

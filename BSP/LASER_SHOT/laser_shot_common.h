@@ -51,4 +51,16 @@ bool Laser_TrackAimPoint_IsRunning(void);
 void Laser_TrackAimPoint_SetMode(TrackMode_t mode);
 void Laser_TrackAimPoint(void);
 
+// Q3键盘任务函数声明（S5/S6/S7/S8通用架构）
+void Task_Q3_Key_S5_Start(void);      // S5任务启动（90度）
+void Task_Q3_Key_S6_Start(void);      // S6任务启动（135度）
+void Task_Q3_Key_S7_Start(void);      // S7任务启动（180度）
+void Task_Q3_Key_S8_Start(void);      // S8任务启动（225度）
+void Task_Q3_Key_Execute(void);       // 通用任务执行函数
+bool Task_Q3_Key_IsRunning(void);     // 检查任务运行状态
+
+// 兼容性函数声明
+void Task_Q3_Key_S5_Execute(void);    // S5任务执行（兼容性保持）
+
+
 #endif

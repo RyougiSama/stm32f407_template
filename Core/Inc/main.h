@@ -73,6 +73,12 @@ void Error_Handler(void);
 #define USER_LED_GPIO_Port GPIOB
 #define OUTPUT_TEST_Pin GPIO_PIN_11
 #define OUTPUT_TEST_GPIO_Port GPIOB
+#define ROW4_Pin GPIO_PIN_14
+#define ROW4_GPIO_Port GPIOB
+#define ROW3_Pin GPIO_PIN_15
+#define ROW3_GPIO_Port GPIOB
+#define ROW2_Pin GPIO_PIN_8
+#define ROW2_GPIO_Port GPIOD
 #define ROW1_Pin GPIO_PIN_10
 #define ROW1_GPIO_Port GPIOD
 #define COL1_Pin GPIO_PIN_11

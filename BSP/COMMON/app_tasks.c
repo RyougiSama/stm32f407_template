@@ -44,7 +44,7 @@ static void Task_ServoCtrl(void)
 }
 #endif
 
-#if 1
+#if 0
 /**
  * @brief OLED显示任务
  *
@@ -75,11 +75,14 @@ static void Task_TrackControl(void)
     // 执行Q2或Q3任务
     if (g_task_basic_q2_with_zdt_running) {
         Task_BasicQ2_WithZDT_Execute();
-    } else if (g_task_basic_q3_running) {
-        Task_BasicQ3_Execute();
-    } else if (Laser_TrackAimPoint_IsRunning()) {
-        // 执行激光追踪任务
-        Laser_TrackAimPoint();
+    }
+    // else if (Laser_TrackAimPoint_IsRunning()) {
+    //     // 执行激光追踪任务
+    //     Laser_TrackAimPoint();
+    // } 
+    else if (Task_Q3_Key_IsRunning()) {
+        // 执行Q3键盘任务（S5/S6/S7/S8通用）
+        Task_Q3_Key_Execute();
     }
 }
 #endif

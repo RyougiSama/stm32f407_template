@@ -5,35 +5,53 @@
 #include "oled_user.h"
 #include "task_scheduler.h"
 
+// GPIO端口和引脚宏定义兼容
+#define ROW1_PORT ROW1_GPIO_Port
+#define ROW1_PIN ROW1_Pin
+#define ROW2_PORT ROW2_GPIO_Port
+#define ROW2_PIN ROW2_Pin
+#define ROW3_PORT ROW3_GPIO_Port
+#define ROW3_PIN ROW3_Pin
+#define ROW4_PORT ROW4_GPIO_Port
+#define ROW4_PIN ROW4_Pin
+#define COL1_PORT COL1_GPIO_Port
+#define COL1_PIN COL1_Pin
+#define COL2_PORT COL2_GPIO_Port
+#define COL2_PIN COL2_Pin
+#define COL3_PORT COL3_GPIO_Port
+#define COL3_PIN COL3_Pin
+#define COL4_PORT COL4_GPIO_Port
+#define COL4_PIN COL4_Pin
+
 /* 按键消抖实例 */
 static KeyDebounce_t key_debounce;
 
-static KeyValue_t Key_GetNum(void)
-{
-    KeyValue_t key_num = KEY_NONE;
-    if (HAL_GPIO_ReadPin(GPIOE, KEY_0_Pin) == GPIO_PIN_RESET) {
-        key_num = KEY_0;
-    }
-    if (HAL_GPIO_ReadPin(GPIOE, KEY_1_Pin) == GPIO_PIN_RESET) {
-        key_num = KEY_1;
-    }
-    if (HAL_GPIO_ReadPin(USER_KEY_GPIO_Port, USER_KEY_Pin) == GPIO_PIN_SET) {
-        key_num = USER_KEY;
-    }
-    if (HAL_GPIO_ReadPin(COL1_GPIO_Port, COL1_Pin) == GPIO_PIN_RESET) {
-        key_num = KEY_S1;
-    }
-    if (HAL_GPIO_ReadPin(COL2_GPIO_Port, COL2_Pin) == GPIO_PIN_RESET) {
-        key_num = KEY_S2;
-    }
-    if (HAL_GPIO_ReadPin(COL3_GPIO_Port, COL3_Pin) == GPIO_PIN_RESET) {
-        key_num = KEY_S3;
-    }
-    if (HAL_GPIO_ReadPin(COL4_GPIO_Port, COL4_Pin) == GPIO_PIN_RESET) {
-        key_num = KEY_S4;
-    }
-    return key_num;
-}
+// static KeyValue_t Key_GetNum(void)
+// {
+//     KeyValue_t key_num = KEY_NONE;
+//     if (HAL_GPIO_ReadPin(GPIOE, KEY_0_Pin) == GPIO_PIN_RESET) {
+//         key_num = KEY_0;
+//     }
+//     if (HAL_GPIO_ReadPin(GPIOE, KEY_1_Pin) == GPIO_PIN_RESET) {
+//         key_num = KEY_1;
+//     }
+//     if (HAL_GPIO_ReadPin(USER_KEY_GPIO_Port, USER_KEY_Pin) == GPIO_PIN_SET) {
+//         key_num = USER_KEY;
+//     }
+//     if (HAL_GPIO_ReadPin(COL1_GPIO_Port, COL1_Pin) == GPIO_PIN_RESET) {
+//         key_num = KEY_S1;
+//     }
+//     if (HAL_GPIO_ReadPin(COL2_GPIO_Port, COL2_Pin) == GPIO_PIN_RESET) {
+//         key_num = KEY_S2;
+//     }
+//     if (HAL_GPIO_ReadPin(COL3_GPIO_Port, COL3_Pin) == GPIO_PIN_RESET) {
+//         key_num = KEY_S3;
+//     }
+//     if (HAL_GPIO_ReadPin(COL4_GPIO_Port, COL4_Pin) == GPIO_PIN_RESET) {
+//         key_num = KEY_S4;
+//     }
+//     return key_num;
+// }
 
 /**
  * @brief 获取经过消抖处理的按键值
@@ -43,7 +61,7 @@ static KeyValue_t Key_GetNum(void)
 KeyValue_t Key_GetDebounced(void)
 {
     uint32_t current_tick = TaskScheduler_GetSystemTick();
-    KeyValue_t raw_key = Key_GetNum();
+    KeyValue_t raw_key = Matrix_Key_Scan();
     switch (key_debounce.state) {
         case KEY_STATE_IDLE:
             if (raw_key != KEY_NONE) {
@@ -97,13 +115,12 @@ KeyValue_t Key_GetDebounced(void)
     return KEY_NONE; /* 无稳定按键 */
 }
 
-#if 0
-uint8_t Matrix_Key_Scan(void)
+KeyValue_t Matrix_Key_Scan(void)
 {
     uint8_t current_raw_key = 0;
 
     // --- Scan Row 1 ---
-    HAL_GPIO_WritePin(ROW1_PORT, ROW1_PIN, GPIO_PIN_RESET); // Pull Row 1 LOW
+    HAL_GPIO_WritePin(ROW1_PORT, ROW1_PIN, GPIO_PIN_RESET);  // Pull Row 1 LOW
     HAL_GPIO_WritePin(ROW2_PORT, ROW2_PIN, GPIO_PIN_SET);
     HAL_GPIO_WritePin(ROW3_PORT, ROW3_PIN, GPIO_PIN_SET);
     HAL_GPIO_WritePin(ROW4_PORT, ROW4_PIN, GPIO_PIN_SET);
@@ -120,8 +137,8 @@ uint8_t Matrix_Key_Scan(void)
 
     // --- Scan Row 2 ---
     if (current_raw_key == 0) {
-        HAL_GPIO_WritePin(ROW1_PORT, ROW1_PIN, GPIO_PIN_SET);   // Set previous row HIGH
-        HAL_GPIO_WritePin(ROW2_PORT, ROW2_PIN, GPIO_PIN_RESET); // Pull Row 2 LOW
+        HAL_GPIO_WritePin(ROW1_PORT, ROW1_PIN, GPIO_PIN_SET);    // Set previous row HIGH
+        HAL_GPIO_WritePin(ROW2_PORT, ROW2_PIN, GPIO_PIN_RESET);  // Pull Row 2 LOW
 
         if (HAL_GPIO_ReadPin(COL1_PORT, COL1_PIN) == GPIO_PIN_RESET) {
             current_raw_key = 5;
@@ -136,8 +153,8 @@ uint8_t Matrix_Key_Scan(void)
 
     // --- Scan Row 3 ---
     if (current_raw_key == 0) {
-        HAL_GPIO_WritePin(ROW2_PORT, ROW2_PIN, GPIO_PIN_SET);   // Set previous row HIGH
-        HAL_GPIO_WritePin(ROW3_PORT, ROW3_PIN, GPIO_PIN_RESET); // Pull Row 3 LOW
+        HAL_GPIO_WritePin(ROW2_PORT, ROW2_PIN, GPIO_PIN_SET);    // Set previous row HIGH
+        HAL_GPIO_WritePin(ROW3_PORT, ROW3_PIN, GPIO_PIN_RESET);  // Pull Row 3 LOW
 
         if (HAL_GPIO_ReadPin(COL1_PORT, COL1_PIN) == GPIO_PIN_RESET) {
             current_raw_key = 9;
@@ -152,8 +169,8 @@ uint8_t Matrix_Key_Scan(void)
 
     // --- Scan Row 4 ---
     if (current_raw_key == 0) {
-        HAL_GPIO_WritePin(ROW3_PORT, ROW3_PIN, GPIO_PIN_SET);   // Set previous row HIGH
-        HAL_GPIO_WritePin(ROW4_PORT, ROW4_PIN, GPIO_PIN_RESET); // Pull Row 4 LOW
+        HAL_GPIO_WritePin(ROW3_PORT, ROW3_PIN, GPIO_PIN_SET);    // Set previous row HIGH
+        HAL_GPIO_WritePin(ROW4_PORT, ROW4_PIN, GPIO_PIN_RESET);  // Pull Row 4 LOW
 
         if (HAL_GPIO_ReadPin(COL1_PORT, COL1_PIN) == GPIO_PIN_RESET) {
             current_raw_key = 13;
@@ -172,13 +189,54 @@ uint8_t Matrix_Key_Scan(void)
     HAL_GPIO_WritePin(ROW3_PORT, ROW3_PIN, GPIO_PIN_SET);
     HAL_GPIO_WritePin(ROW4_PORT, ROW4_PIN, GPIO_PIN_SET);
 
-    return current_raw_key;
+    // 将数字键值映射到枚举类型
+    // 4x4矩阵键盘布局映射：
+    // 第1行：1=KEY_S1,  2=KEY_S2,  3=KEY_S3,  4=KEY_S4
+    // 第2行：5=KEY_S5,  6=KEY_S6,  7=KEY_S7,  8=KEY_S8
+    // 第3行：9=KEY_S9,  10=KEY_S10, 11=KEY_S11, 12=KEY_S12
+    // 第4行：13=KEY_S13, 14=KEY_S14, 15=KEY_S15, 16=KEY_S16
+    switch (current_raw_key) {
+        case 1:
+            return KEY_S1;  // 第1行第1列
+        case 2:
+            return KEY_S2;  // 第1行第2列
+        case 3:
+            return KEY_S3;  // 第1行第3列
+        case 4:
+            return KEY_S4;  // 第1行第4列
+        case 5:
+            return KEY_S5;  // 第2行第1列
+        case 6:
+            return KEY_S6;  // 第2行第2列
+        case 7:
+            return KEY_S7;  // 第2行第3列
+        case 8:
+            return KEY_S8;  // 第2行第4列
+        case 9:
+            return KEY_S9;  // 第3行第1列
+        case 10:
+            return KEY_S10;  // 第3行第2列
+        case 11:
+            return KEY_S11;  // 第3行第3列
+        case 12:
+            return KEY_S12;  // 第3行第4列
+        case 13:
+            return KEY_S13;  // 第4行第1列
+        case 14:
+            return KEY_S14;  // 第4行第2列
+        case 15:
+            return KEY_S15;  // 第4行第3列
+        case 16:
+            return KEY_S16;  // 第4行第4列
+        default:
+            return KEY_NONE;  // 无按键或未定义的按键
+    }
 }
-#endif
 
 void Key_Proc(void)
 {
     static KeyValue_t key_val_old = KEY_NONE;
+
     /* 获取经过消抖的按键值 */
     KeyValue_t key_val = Key_GetDebounced();
     /* 只有在按键值变化且不为KEY_NONE时才处理 */
@@ -187,103 +245,29 @@ void Key_Proc(void)
             g_task_basic_q2_with_zdt_running = !g_task_basic_q2_with_zdt_running;  // 切换任务状态
             g_task_basic_q2_with_zdt_start_time = HAL_GetTick();
         } else if (key_val == KEY_S2) {
+            // Emm_V5_Origin_Set_O(STEP_MOTOR_X, true);
             // Emm_V5_Origin_Trigger_Return(STEP_MOTOR_Y, 1, false);
-            HAL_GPIO_TogglePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin);
-            HAL_Delay(20);
-            // OLED_ShowString(0, 0, "OK", 16);
         } else if (key_val == KEY_S3) {
-            Task_BasicQ3_Start();
+            Emm_V5_Origin_Trigger_Return(STEP_MOTOR_X, 0, false);
         } else if (key_val == KEY_S4) {
             if (Laser_TrackAimPoint_IsRunning()) {
                 Laser_TrackAimPoint_Stop();
             } else {
                 Laser_TrackAimPoint_Start();
             }
-        } else if (key_val == USER_KEY) {
-            // HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
+        } else if (key_val == KEY_S5) {
+            // S5任务：90度左转
+            Task_Q3_Key_S5_Start();
+        } else if (key_val == KEY_S6) {
+            // S6任务：45度左转
+            Task_Q3_Key_S6_Start();
+        } else if (key_val == KEY_S7) {
+            // S7任务：90度右转
+            Task_Q3_Key_S7_Start();
+        } else if (key_val == KEY_S8) {
+            // S8任务：135度左转
+            Task_Q3_Key_S8_Start();
         }
-
-#if 0
-        if (key_val == KEY_S4 || key_val == USER_KEY) {
-            OLED_ChangeMode();
-        } else {
-            if (g_oled_mode == DISP_CENTER_POINT) {
-
-            } else if (g_oled_mode == SET_ZERO_POINT) {
-                if (key_val == KEY_S1) {
-                    current_set_zero_addr =
-                        (current_set_zero_addr == STEP_MOTOR_X) ? STEP_MOTOR_Y : STEP_MOTOR_X;
-                } else if (key_val == KEY_S2) {
-                    // 执行设置零点操作
-                    Emm_V5_Origin_Set_O(current_set_zero_addr, true);
-                } else if (key_val == KEY_S3) {
-                    Emm_V5_Origin_Trigger_Return(current_set_zero_addr, 0, false);
-                    HAL_Delay(20);
-                }
-            } else if (g_oled_mode == TEST_MODE) {
-                if (key_val == KEY_S1) {
-                    if (Task_BasicQ2_WithZDT_IsRunning()) {
-                        Task_BasicQ2_WithZDT_Stop();
-                    } else {
-                        Task_BasicQ2_WithZDT_Start();
-                        g_task_basic_q2_with_zdt_start_time = TaskScheduler_GetSystemTick();
-                    }
-                } else if (key_val == KEY_S2) {
-                    // Q3任务控制：主动搜索矩形并追踪
-                    if (Task_BasicQ3_IsRunning()) {
-                        Task_BasicQ3_Stop();
-                    } else {
-                        Task_BasicQ3_Start();
-                    }
-                }
-            }
-        }
-#endif
-#if 0
-        switch (key_val)
-        {
-        case KEY_0:
-            if (Task_BasicQ2_WithZDT_IsRunning()) {
-                Task_BasicQ2_WithZDT_Stop();
-            } else {
-                Task_BasicQ2_WithZDT_Start();
-                g_task_basic_q2_with_zdt_start_time = TaskScheduler_GetSystemTick();
-            }
-            break;
-        case KEY_1:
-            // Q3任务控制：主动搜索矩形并追踪
-            if (Task_BasicQ3_IsRunning()) {
-                Task_BasicQ3_Stop();
-            } else {
-                Task_BasicQ3_Start();
-            }
-            break;
-        case KEY_S1:
-            // 激光追踪控制：持续追踪目标点
-            if (Laser_TrackAimPoint_IsRunning()) {
-                Laser_TrackAimPoint_Stop();
-            } else {
-                Laser_TrackAimPoint_Start();
-            }
-            break;
-        case KEY_S2:
-            // 激光追踪模式切换：步进控制 <-> PID控制
-            {
-                static TrackMode_t current_mode = TRACK_MODE_STEP;
-                current_mode = (current_mode == TRACK_MODE_STEP) ? TRACK_MODE_PID : TRACK_MODE_STEP;
-                Laser_TrackAimPoint_SetMode(current_mode);
-                // 可以在这里添加模式切换提示
-            }
-            break;
-        case KEY_S3:
-            break;
-        case KEY_S4:
-            OLED_ChangeMode();
-            break;
-        default:
-            break;
-        }
-#endif
     }
     /* 当按键释放时清除旧key_val_old */
     if (key_val == KEY_NONE) {

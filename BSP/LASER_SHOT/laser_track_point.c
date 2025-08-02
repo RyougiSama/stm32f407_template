@@ -8,27 +8,27 @@
 // 以下参数影响PID追踪的响应速度和精度，可根据实际效果调整
 
 // PID控制器参数 - 影响追踪响应速度和稳定性
-#define PID_KP_VALUE        1.5f    // 比例系数：增大可提高响应速度，过大会振荡
-#define PID_KI_VALUE        0.02f   // 积分系数：消除稳态误差，过大会超调
-#define PID_KD_VALUE        0.15f   // 微分系数：改善动态性能，减少超调
+#define PID_KP_VALUE 1.5f   // 比例系数：增大可提高响应速度，过大会振荡
+#define PID_KI_VALUE 0.02f  // 积分系数：消除稳态误差，过大会超调
+#define PID_KD_VALUE 0.15f  // 微分系数：改善动态性能，减少超调
 
 // PID输出限制 - 控制最大步进数，影响追踪速度
-#define PID_OUTPUT_MAX      50.0f   // 最大输出步进数（增大可提高追踪速度）
-#define PID_OUTPUT_MIN      -50.0f  // 最小输出步进数
-#define PID_INTEGRAL_MAX    25.0f   // 积分限幅上限（防止积分饱和）
-#define PID_INTEGRAL_MIN    -25.0f  // 积分限幅下限
+#define PID_OUTPUT_MAX 50.0f     // 最大输出步进数（增大可提高追踪速度）
+#define PID_OUTPUT_MIN -50.0f    // 最小输出步进数
+#define PID_INTEGRAL_MAX 25.0f   // 积分限幅上限（防止积分饱和）
+#define PID_INTEGRAL_MIN -25.0f  // 积分限幅下限
 
 // 电机控制参数 - 影响实际执行速度
-#define PID_MOTOR_VELOCITY  30      // PID模式电机速度（增大可提高追踪速度）
-#define PID_MOTOR_ACCELERATION 15   // PID模式电机加速度（影响启动响应）
+#define PID_MOTOR_VELOCITY 30      // PID模式电机速度（增大可提高追踪速度）
+#define PID_MOTOR_ACCELERATION 15  // PID模式电机加速度（影响启动响应）
 
 // 死区和步进限制 - 影响追踪精度和最小动作
-#define PID_DEADZONE        3       // 死区大小（像素）：减小提高精度
-#define PID_MIN_STEP        1       // 最小步进数：减小提高精度
-#define PID_MAX_STEP        20      // 最大步进数：增大提高大误差时的追踪速度
+#define PID_DEADZONE 3   // 死区大小（像素）：减小提高精度
+#define PID_MIN_STEP 1   // 最小步进数：减小提高精度
+#define PID_MAX_STEP 20  // 最大步进数：增大提高大误差时的追踪速度
 
 // 控制延时 - 影响系统响应速度
-#define PID_MOTOR_DELAY_MS  10      // 电机命令间延时（ms）：减小可提高响应速度
+#define PID_MOTOR_DELAY_MS 10  // 电机命令间延时（ms）：减小可提高响应速度
 
 // 调整建议：
 // 1. 追踪太慢：增大PID_KP_VALUE、PID_MOTOR_VELOCITY、PID_MAX_STEP
@@ -60,7 +60,7 @@ static void Laser_TrackPID_Init(void)
     PID_SetParam(&g_laser_track_pid_x, PID_KP_VALUE, PID_KI_VALUE, PID_KD_VALUE);
     PID_SetOutputLimit(&g_laser_track_pid_x, PID_OUTPUT_MIN, PID_OUTPUT_MAX);
     PID_SetIntegralLimit(&g_laser_track_pid_x, PID_INTEGRAL_MIN, PID_INTEGRAL_MAX);
-    
+
     // 初始化Y轴PID控制器
     PID_Init(&g_laser_track_pid_y, PID_TYPE_POSITIONAL);
     PID_SetParam(&g_laser_track_pid_y, PID_KP_VALUE, PID_KI_VALUE, PID_KD_VALUE);
@@ -129,7 +129,7 @@ bool Laser_TrackAimPoint_IsRunning(void)
 static bool Laser_Track_StepControl(void)
 {
     const uint16_t vel = 20;      // 电机速度
-    const uint8_t acc = 10;        // 电机加速度
+    const uint8_t acc = 10;       // 电机加速度
     const uint16_t DEADZONE = 3;  // 死区范围
 
     // 计算误差
@@ -187,9 +187,9 @@ static bool Laser_Track_StepControl(void)
  */
 static bool Laser_Track_PIDControl(void)
 {
-    const uint16_t vel = PID_MOTOR_VELOCITY;      // 使用配置的电机速度
-    const uint8_t acc = PID_MOTOR_ACCELERATION;   // 使用配置的电机加速度
-    const uint16_t DEADZONE = PID_DEADZONE;       // 使用配置的死区
+    const uint16_t vel = PID_MOTOR_VELOCITY;     // 使用配置的电机速度
+    const uint8_t acc = PID_MOTOR_ACCELERATION;  // 使用配置的电机加速度
+    const uint16_t DEADZONE = PID_DEADZONE;      // 使用配置的死区
 
     // 计算误差（目标位置 - 当前位置）
     float error_x = (float)(g_sensor_aim_x - g_curr_center_point.x);
