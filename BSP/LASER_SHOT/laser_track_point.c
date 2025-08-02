@@ -4,9 +4,42 @@
 #include "pid_controller.h"
 #include "task_scheduler.h"
 
+// ==================== PID追踪参数配置区域 ====================
+// 以下参数影响PID追踪的响应速度和精度，可根据实际效果调整
+
+// PID控制器参数 - 影响追踪响应速度和稳定性
+#define PID_KP_VALUE        1.5f    // 比例系数：增大可提高响应速度，过大会振荡
+#define PID_KI_VALUE        0.02f   // 积分系数：消除稳态误差，过大会超调
+#define PID_KD_VALUE        0.15f   // 微分系数：改善动态性能，减少超调
+
+// PID输出限制 - 控制最大步进数，影响追踪速度
+#define PID_OUTPUT_MAX      80.0f   // 最大输出步进数（增大可提高追踪速度）
+#define PID_OUTPUT_MIN      -80.0f  // 最小输出步进数
+#define PID_INTEGRAL_MAX    25.0f   // 积分限幅上限（防止积分饱和）
+#define PID_INTEGRAL_MIN    -25.0f  // 积分限幅下限
+
+// 电机控制参数 - 影响实际执行速度
+#define PID_MOTOR_VELOCITY  40      // PID模式电机速度（增大可提高追踪速度）
+#define PID_MOTOR_ACCELERATION 20   // PID模式电机加速度（影响启动响应）
+
+// 死区和步进限制 - 影响追踪精度和最小动作
+#define PID_DEADZONE        2       // 死区大小（像素）：减小提高精度
+#define PID_MIN_STEP        1       // 最小步进数：减小提高精度
+#define PID_MAX_STEP        30      // 最大步进数：增大提高大误差时的追踪速度
+
+// 控制延时 - 影响系统响应速度
+#define PID_MOTOR_DELAY_MS  10      // 电机命令间延时（ms）：减小可提高响应速度
+
+// 调整建议：
+// 1. 追踪太慢：增大PID_KP_VALUE、PID_MOTOR_VELOCITY、PID_MAX_STEP
+// 2. 追踪振荡：减小PID_KP_VALUE、PID_KD_VALUE，检查PID_MOTOR_DELAY_MS
+// 3. 精度不够：减小PID_DEADZONE、PID_MIN_STEP
+// 4. 响应迟钝：减小PID_MOTOR_DELAY_MS，增大PID_MOTOR_ACCELERATION
+// =============================================================
+
 // 激光追踪任务相关变量
 static bool g_laser_track_running = false;
-static TrackMode_t g_track_mode = TRACK_MODE_PID;  // 默认使用步进控制
+static TrackMode_t g_track_mode = TRACK_MODE_STEP;  // 默认使用步进控制
 
 // 步进控制相关参数（与Q2保持一致）
 #define LASER_CLK_STEP_SMALL 3   // 小步进值，微调用
@@ -24,15 +57,15 @@ static void Laser_TrackPID_Init(void)
 {
     // 初始化X轴PID控制器
     PID_Init(&g_laser_track_pid_x, PID_TYPE_POSITIONAL);
-    PID_SetParam(&g_laser_track_pid_x, 0.5f, 0.01f, 0.1f);      // Kp=0.5, Ki=0.01, Kd=0.1
-    PID_SetOutputLimit(&g_laser_track_pid_x, -50.0f, 50.0f);    // 限制输出步进数
-    PID_SetIntegralLimit(&g_laser_track_pid_x, -20.0f, 20.0f);  // 积分限幅
-
+    PID_SetParam(&g_laser_track_pid_x, PID_KP_VALUE, PID_KI_VALUE, PID_KD_VALUE);
+    PID_SetOutputLimit(&g_laser_track_pid_x, PID_OUTPUT_MIN, PID_OUTPUT_MAX);
+    PID_SetIntegralLimit(&g_laser_track_pid_x, PID_INTEGRAL_MIN, PID_INTEGRAL_MAX);
+    
     // 初始化Y轴PID控制器
     PID_Init(&g_laser_track_pid_y, PID_TYPE_POSITIONAL);
-    PID_SetParam(&g_laser_track_pid_y, 0.5f, 0.01f, 0.1f);      // Kp=0.5, Ki=0.01, Kd=0.1
-    PID_SetOutputLimit(&g_laser_track_pid_y, -50.0f, 50.0f);    // 限制输出步进数
-    PID_SetIntegralLimit(&g_laser_track_pid_y, -20.0f, 20.0f);  // 积分限幅
+    PID_SetParam(&g_laser_track_pid_y, PID_KP_VALUE, PID_KI_VALUE, PID_KD_VALUE);
+    PID_SetOutputLimit(&g_laser_track_pid_y, PID_OUTPUT_MIN, PID_OUTPUT_MAX);
+    PID_SetIntegralLimit(&g_laser_track_pid_y, PID_INTEGRAL_MIN, PID_INTEGRAL_MAX);
 }
 
 /**
@@ -154,9 +187,9 @@ static bool Laser_Track_StepControl(void)
  */
 static bool Laser_Track_PIDControl(void)
 {
-    const uint16_t vel = 15;      // PID模式使用稍高速度
-    const uint8_t acc = 8;        // PID模式使用稍高加速度
-    const uint16_t DEADZONE = 2;  // PID模式使用更小死区，精度更高
+    const uint16_t vel = PID_MOTOR_VELOCITY;      // 使用配置的电机速度
+    const uint8_t acc = PID_MOTOR_ACCELERATION;   // 使用配置的电机加速度
+    const uint16_t DEADZONE = PID_DEADZONE;       // 使用配置的死区
 
     // 计算误差（目标位置 - 当前位置）
     float error_x = (float)(g_sensor_aim_x - g_curr_center_point.x);
@@ -175,41 +208,41 @@ static bool Laser_Track_PIDControl(void)
     float pid_output_x = PID_Compute(&g_laser_track_pid_x, -error_x);  // 负号使得输出方向正确
     float pid_output_y = PID_Compute(&g_laser_track_pid_y, -error_y);
 
-    // 限制最小步进值，避免过小的调整
+    // 限制步进值范围
     uint16_t step_x = (uint16_t)abs(pid_output_x);
     uint16_t step_y = (uint16_t)abs(pid_output_y);
 
-    if (step_x > 0 && step_x < 2)
-        step_x = 2;  // 最小步进
-    if (step_y > 0 && step_y < 2)
-        step_y = 2;
+    if (step_x > 0 && step_x < PID_MIN_STEP)
+        step_x = PID_MIN_STEP;  // 使用配置的最小步进
+    if (step_y > 0 && step_y < PID_MIN_STEP)
+        step_y = PID_MIN_STEP;
 
-    if (step_x > 20)
-        step_x = 20;  // 最大步进限制
-    if (step_y > 20)
-        step_y = 20;
+    if (step_x > PID_MAX_STEP)
+        step_x = PID_MAX_STEP;  // 使用配置的最大步进限制
+    if (step_y > PID_MAX_STEP)
+        step_y = PID_MAX_STEP;
 
     // 控制X轴电机（根据误差方向直接判断）
     if (abs(error_x) > DEADZONE) {
         if (error_x > 0) {
             // 目标在右侧，需要右转
-            Emm_V5_Pos_Control(STEP_MOTOR_X, DIR_CW, vel, acc, step_x, false, false);
+            Emm_V5_Pos_Control(STEP_MOTOR_X, DIR_CCW, vel, acc, step_x, false, false);
         } else {
             // 目标在左侧，需要左转
-            Emm_V5_Pos_Control(STEP_MOTOR_X, DIR_CCW, vel, acc, step_x, false, false);
+            Emm_V5_Pos_Control(STEP_MOTOR_X, DIR_CW, vel, acc, step_x, false, false);
         }
     }
 
-    HAL_Delay(20);  // 延时避免指令冲突
+    HAL_Delay(PID_MOTOR_DELAY_MS);  // 使用配置的延时
 
     // 控制Y轴电机（根据误差方向直接判断）
     if (abs(error_y) > DEADZONE) {
         if (error_y > 0) {
             // 目标在上方，需要上转
-            Emm_V5_Pos_Control(STEP_MOTOR_Y, DIR_CW, vel, acc, step_y, false, false);
+            Emm_V5_Pos_Control(STEP_MOTOR_Y, DIR_CCW, vel, acc, step_y, false, false);
         } else {
             // 目标在下方，需要下转
-            Emm_V5_Pos_Control(STEP_MOTOR_Y, DIR_CCW, vel, acc, step_y, false, false);
+            Emm_V5_Pos_Control(STEP_MOTOR_Y, DIR_CW, vel, acc, step_y, false, false);
         }
     }
 
