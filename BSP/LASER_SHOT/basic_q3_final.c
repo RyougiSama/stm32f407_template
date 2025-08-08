@@ -3,6 +3,7 @@
 #include "laser_shot_common.h"
 #include "pid_controller.h"
 #include "task_scheduler.h"
+#include "uart_user.h"  // 添加串口用户函数头文件
 
 uint16_t g_sensor_aim_x = 150;
 uint16_t g_sensor_aim_y = 130;
@@ -11,13 +12,13 @@ uint16_t g_sensor_aim_y = 130;
 // 以下参数影响Q3键盘任务的PID追踪响应速度和精度，可根据实际效果调整
 
 // PID控制器参数 - 影响追踪响应速度和稳定性
-#define Q3_KEY_PID_KP_VALUE 1.8f   // X轴PID比例系数（针对4秒限制优化）
+#define Q3_KEY_PID_KP_VALUE 1.2f   // X轴PID比例系数（针对4秒限制优化）
 #define Q3_KEY_PID_KI_VALUE 0.05f  // X轴PID积分系数
 #define Q3_KEY_PID_KD_VALUE 0.1f   // X轴PID微分系数
 
 // PID输出限制 - 控制最大步进数，影响追踪速度
-#define Q3_KEY_PID_OUTPUT_MAX 30.0f     // 最大输出步进数
-#define Q3_KEY_PID_OUTPUT_MIN -30.0f    // 最小输出步进数
+#define Q3_KEY_PID_OUTPUT_MAX 15.0f     // 最大输出步进数
+#define Q3_KEY_PID_OUTPUT_MIN -15.0f    // 最小输出步进数
 #define Q3_KEY_PID_INTEGRAL_MAX 20.0f   // 积分限幅上限
 #define Q3_KEY_PID_INTEGRAL_MIN -20.0f  // 积分限幅下限
 
@@ -26,15 +27,16 @@ uint16_t g_sensor_aim_y = 130;
 #define Q3_KEY_MOTOR_ACCELERATION 18  // 电机加速度
 
 // 死区和步进限制 - 影响追踪精度和最小动作
-#define Q3_KEY_DEADZONE 2   // 死区大小（像素，更小以提高精度）
+#define Q3_KEY_DEADZONE 5   // 死区大小（像素，更小以提高精度）
 #define Q3_KEY_MIN_STEP 1   // 最小步进数
-#define Q3_KEY_MAX_STEP 25  // 最大步进数（增大以提高大误差时的追踪速度）
+#define Q3_KEY_MAX_STEP 20  // 最大步进数（增大以提高大误差时的追踪速度）
 
 // 控制延时 - 影响系统响应速度
 #define Q3_KEY_MOTOR_DELAY_MS 20  // 电机命令延时（ms，减小以提高响应速度）
 
 // 任务超时控制
-#define Q3_KEY_TIMEOUT_MS 4000  // 总超时时间4秒
+#define Q3_KEY_TIMEOUT_MS 5000  // 总超时时间4秒
+
 
 // 初始转角配置（45度为基准）
 #define Q3_KEY_TURN_VEL 40      // 初始转动电机速度
@@ -112,7 +114,6 @@ static bool Q3_Key_PID_Control_X(void)
 
     // 计算PID输出（步进数），将误差作为当前值输入
     float pid_output_x = PID_Compute(&g_q3_key_task_state.pid_x, -error_x);  // 负号使得输出方向正确
-
     // 限制步进值范围
     uint16_t step_x = (uint16_t)abs(pid_output_x);
 
@@ -126,10 +127,10 @@ static bool Q3_Key_PID_Control_X(void)
     if (abs(error_x) > DEADZONE) {
         if (error_x > 0) {
             // 目标在右侧，需要右转
-            Emm_V5_Pos_Control(STEP_MOTOR_X, DIR_CCW, vel, acc, step_x, false, false);
+            Emm_V5_Pos_Control(STEP_MOTOR_X, DIR_CW, vel, acc, step_x, false, false);
         } else {
             // 目标在左侧，需要左转
-            Emm_V5_Pos_Control(STEP_MOTOR_X, DIR_CW, vel, acc, step_x, false, false);
+            Emm_V5_Pos_Control(STEP_MOTOR_X, DIR_CCW, vel, acc, step_x, false, false);
         }
     }
 
@@ -146,12 +147,15 @@ static void Q3_Key_Task_Stop(void)
     g_q3_key_task_state.is_running = false;
     g_q3_key_task_state.pid_initialized = false;
     g_q3_key_task_state.start_time = 0;
-
+    
     // 停止X轴电机
     Emm_V5_Stop_Now(STEP_MOTOR_X, false);
 
-    // 关闭激光指示器
-    // HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_RESET);
+    // 恢复串口中值滤波
+    Uart_SetFilterEnabled(true);
+
+    // 打开激光指示器
+    HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
 }
 
 /**
@@ -165,6 +169,9 @@ static void Q3_Key_Task_Start_Common(Q3KeyTaskType_t task_type)
         Q3_Key_Task_Stop();
         HAL_Delay(100);  // 等待电机停止
     }
+
+    // 关闭串口中值滤波，提高响应速度
+    Uart_SetFilterEnabled(false);
 
     // 初始化任务状态
     g_q3_key_task_state.is_running = true;
@@ -184,7 +191,7 @@ static void Q3_Key_Task_Start_Common(Q3KeyTaskType_t task_type)
                        false, false);
             break;
         case Q3_KEY_TASK_S6:
-            turn_angle_clk = (uint32_t)(Q3_KEY_TURN_45_CLK / 9.0f * 4.0f);
+            turn_angle_clk = (uint32_t)(Q3_KEY_TURN_45_CLK / 45.0f * 30.0f);
             Emm_V5_Pos_Control(STEP_MOTOR_X, DIR_CW, Q3_KEY_TURN_VEL, Q3_KEY_TURN_ACC, turn_angle_clk,
                        false, false);
             break;
@@ -233,7 +240,7 @@ void Task_Q3_Key_S7_Start(void)
 }
 
 /**
- * @brief S8任务启动函数（225度转角）
+ * @brief S8任务启动函数
  */
 void Task_Q3_Key_S8_Start(void)
 {
@@ -275,7 +282,7 @@ void Task_Q3_Key_Execute(void)
     // 如果已对准目标，完成任务
     if (is_aligned) {
         // 打开激光指示器
-        HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
+        // HAL_GPIO_WritePin(OUTPUT_TEST_GPIO_Port, OUTPUT_TEST_Pin, GPIO_PIN_SET);
 
         // 停止任务
         Q3_Key_Task_Stop();

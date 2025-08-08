@@ -249,11 +249,11 @@ void Key_Proc(void)
             // Emm_V5_Origin_Trigger_Return(STEP_MOTOR_Y, 1, false);
         } else if (key_val == KEY_S3) {
         } else if (key_val == KEY_S4) {
-            // if (Laser_TrackAimPoint_IsRunning()) {
-            //     Laser_TrackAimPoint_Stop();
-            // } else {
-            //     Laser_TrackAimPoint_Start();
-            // }
+            if (Laser_TrackAimPoint_IsRunning()) {
+                Laser_TrackAimPoint_Stop();
+            } else {
+                Laser_TrackAimPoint_Start();
+            }
         } else if (key_val == KEY_S5) {
             // S5任务：90度左转
             Task_Q3_Key_S5_Start();
